@@ -1,4 +1,4 @@
-# GWL DAO - Gwalior Web3 & Tech Community Website
+# GWALIOR_DAO_Website
 
 ![Web3](https://img.shields.io/badge/Web3-Community-brightgreen)
 ![HTML](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)
