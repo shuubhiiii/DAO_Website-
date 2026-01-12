@@ -1777,6 +1777,66 @@
       border-radius: 20px;
     }
     
+    /* Video Thumbnail Styles */
+    .video-thumbnail {
+      padding-bottom: 0;
+      position: relative;
+    }
+    
+    .video-link {
+      display: block;
+      position: relative;
+      width: 100%;
+    }
+    
+    .video-thumb-img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 20px;
+    }
+    
+    .video-play-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 20px;
+      transition: all 0.3s ease;
+    }
+    
+    .video-link:hover .video-play-overlay {
+      background: rgba(0, 0, 0, 0.6);
+    }
+    
+    .play-button {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, var(--gradient-1), var(--gradient-2));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: #fff;
+      box-shadow: 0 10px 40px rgba(255, 107, 107, 0.5);
+      transition: transform 0.3s ease;
+    }
+    
+    .video-link:hover .play-button {
+      transform: scale(1.1);
+    }
+    
+    .video-play-overlay p {
+      margin-top: 1rem;
+      color: #fff;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+    
     /* Video Placeholder */
     .video-placeholder {
       display: flex;
@@ -3467,12 +3527,15 @@
   
   <!-- Event Video -->
   <div class="features-video">
-    <div class="video-container video-placeholder">
-      <div class="video-placeholder-content">
-        <div class="play-icon">▶</div>
-        <h3>Event Highlights Coming Soon</h3>
-        <p>Stay tuned for GwaliorDAO 2026 event videos</p>
-      </div>
+    <div class="video-container">
+      <iframe 
+        src="https://www.youtube-nocookie.com/embed/BvEz7VJoH64?controls=1&rel=0&playsinline=1&enablejsapi=1" 
+        title="GwaliorDAO Event Highlights"
+        frameborder="0" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen>
+      </iframe>
     </div>
   </div>
   
