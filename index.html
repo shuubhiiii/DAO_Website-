@@ -86,6 +86,16 @@
       mix-blend-mode: difference;
     }
     
+    /* Hide cursor on mobile/touch devices */
+    @media (max-width: 768px), (hover: none), (pointer: coarse) {
+      .cursor-blob {
+        display: none !important;
+      }
+      body {
+        cursor: auto !important;
+      }
+    }
+    
     /* SVG Filter for gooey effect */
     .svg-filters {
       position: absolute;
