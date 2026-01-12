@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>GWL DAO | Gwalior Web3 & Tech Community</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- GSAP + Plugins -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollSmoother.min.js"></script>
+
+  <!-- Lenis Smooth Scroll -->
+  <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.23/dist/lenis.min.js"></script>
+  
+  <!-- Fallback: Hide loader after 4 seconds if JS fails -->
+  <style>
+    .loader { animation: loaderFallback 0s 4s forwards; }
+    @keyframes loaderFallback { to { display: none; opacity: 0; visibility: hidden; } }
+  </style>
+</head>
+<body class="no-js">
+<script>document.body.classList.remove('no-js');</script>
+
+<!-- Cursor -->
+<div class="cursor"></div>
+<div class="cursor-follower"></div>
+
+<!-- Loader -->
+<div class="loader" id="loader">
+  <div class="loader-inner">
+    <div class="loader-text">
+      <span>G</span><span>W</span><span>L</span><span>D</span><span>A</span><span>O</span>
+    </div>
+    <div class="loader-bar"></div>
+  </div>
+</div>
+
+<!-- Navigation -->
+<nav class="navbar">
+  <div class="nav-logo">
+    <svg class="logo-icon" width="40" height="40" viewBox="0 0 40 40" fill="none">
+      <path d="M20 2L8 8V16L4 18V30L20 38L36 30V18L32 16V8L20 2Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+      <path d="M12 12H28V24H12V12Z" stroke="currentColor" stroke-width="1"/>
+      <path d="M16 24V28M20 24V30M24 24V28" stroke="currentColor" stroke-width="1"/>
+      <circle cx="20" cy="8" r="2" fill="currentColor"/>
+    </svg>
+    <span class="logo-text">GWL<span class="logo-dao">DAO</span></span>
+  </div>
+  <div class="nav-menu">
+    <a href="#about" class="nav-link">About</a>
+    <a href="#events" class="nav-link">Events</a>
+    <a href="#vision" class="nav-link">Vision</a>
+    <a href="#community" class="nav-link">Community</a>
+  </div>
+  <div class="nav-cta">
+    <button class="btn btn-outline" onclick="document.getElementById('events').scrollIntoView({behavior: 'smooth'})">Side Events</button>
+    <button class="btn btn-primary" onclick="openRegisterModal()">Buy Ticket →</button>
+  </div>
+  <div class="nav-burger">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero" id="hero">
+  <div class="hero-bg">
+    <div class="gradient-orb orb-1"></div>
+    <div class="gradient-orb orb-2"></div>
+    <div class="gradient-orb orb-3"></div>
+    <div class="grid-overlay"></div>
+  </div>
+  
+  <div class="hero-content">
+    <div class="hero-main-grid">
+      <!-- Left Content -->
+      <div class="hero-left">
+        <div class="hero-logo-large">
+          <svg width="80" height="80" viewBox="0 0 40 40" fill="none">
+            <path d="M20 2L8 8V16L4 18V30L20 38L36 30V18L32 16V8L20 2Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+            <path d="M12 12H28V24H12V12Z" stroke="currentColor" stroke-width="1"/>
+            <path d="M16 24V28M20 24V30M24 24V28" stroke="currentColor" stroke-width="1"/>
+            <circle cx="20" cy="8" r="2" fill="currentColor"/>
+          </svg>
+          <span class="hero-logo-text">GWL<span>DAO</span></span>
+        </div>
+        
+        <p class="hero-description">
+          Gwalior DAO is a regional Web3 & tech community shaping the next wave of decentralization in Gwalior. Through meetups, hackathons, campus connects, and collaborative learning, we connect builders, creators, developers, and innovators who share a vision for an open, community driven digital future.
+        </p>
+        
+        <div class="hero-buttons">
+          <button class="btn btn-large btn-glow" onclick="openRegisterModal()">
+            <span>Buy Ticket</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <button class="btn btn-large btn-ghost" onclick="document.getElementById('events').scrollIntoView({behavior: 'smooth'})">
+            <span>Side Events</span>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Right Content - Video Section -->
+      <div class="hero-right">
+        <div class="video-card glow-border">
+          <div class="video-thumbnail">
+            <img src="images/conference.jpg" alt="GWL Conference 2025" onerror="this.style.display='none'; this.parentElement.classList.add('placeholder-active');">
+            <div class="video-placeholder">
+              <span class="conf-year">2025</span>
+              <span class="conf-title">GWL CONFERENCE</span>
+            </div>
+            <button class="play-btn" onclick="alert('Video coming soon!')">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </button>
+          </div>
+          <div class="video-sponsors">
+            <span>#FIN</span>
+            <span>devfolio</span>
+            <span>APTOS</span>
+            <span>Moc</span>
+            <span>rise in</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="scroll-indicator">
+    <span class="scroll-text">Scroll to explore</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- Vision Section -->
+<section class="vision-section" id="vision">
+  <div class="container">
+    <div class="vision-grid">
+      <div class="vision-content glow-border">
+        <p class="vision-text">
+          A space to explore emerging technologies, collaborate with global ecosystems, and build meaningful opportunities together powered by collective ownership, shared innovation, and strong community led coordination that enables open collaboration, and long term impact at scale.
+        </p>
+        <div class="vision-hashtag">#GWALIORDAO</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Marquee Section -->
+<section class="marquee-section" id="events">
+  <div class="marquee">
+    <div class="marquee-inner">
+      <span>MEETUPS</span>
+      <span class="dot">◆</span>
+      <span>HACKATHONS</span>
+      <span class="dot">◆</span>
+      <span>CAMPUS CONNECTS</span>
+      <span class="dot">◆</span>
+      <span>WEB3</span>
+      <span class="dot">◆</span>
+      <span>BLOCKCHAIN</span>
+      <span class="dot">◆</span>
+      <span>GWALIOR</span>
+      <span class="dot">◆</span>
+      <span>MEETUPS</span>
+      <span class="dot">◆</span>
+      <span>HACKATHONS</span>
+      <span class="dot">◆</span>
+      <span>DEFI</span>
+      <span class="dot">◆</span>
+      <span>SMART CONTRACTS</span>
+      <span class="dot">◆</span>
+      <span>NFT</span>
+      <span class="dot">◆</span>
+      <span>METAVERSE</span>
+      <span class="dot">◆</span>
+    </div>
+  </div>
+</section>
+
+<!-- About Conference Section -->
+<section class="about-conference" id="about">
+  <div class="container">
+    <div class="about-conference-grid">
+      <!-- Left - Main Info -->
+      <div class="conference-info">
+        <span class="section-tag">About The Event</span>
+        <h2 class="conference-title">India Blockchain Week <span>Gwalior Edition</span></h2>
+        
+        <p class="conference-description">
+          India Blockchain Week (GwaliorDAO) is India's premier regional blockchain gathering, held from <strong>December 1-7, 2025</strong>. It's a weeklong celebration featuring global Web3 gatherings by ETHIndia, Aptos, Polygon, and more.
+        </p>
+        
+        <p class="conference-description">
+          We bring together builders, developers, creators, and innovators from across the country to explore emerging technologies, collaborate with global ecosystems, and build meaningful opportunities together.
+        </p>
+        
+        <div class="conference-highlights">
+          <div class="highlight-item">
+            <div class="highlight-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+            </div>
+            <div class="highlight-text">
+              <span class="highlight-value">7 Days</span>
+              <span class="highlight-label">of Events</span>
+            </div>
+          </div>
+          
+          <div class="highlight-item">
+            <div class="highlight-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+            </div>
+            <div class="highlight-text">
+              <span class="highlight-value">500+</span>
+              <span class="highlight-label">Attendees</span>
+            </div>
+          </div>
+          
+          <div class="highlight-item">
+            <div class="highlight-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+            </div>
+            <div class="highlight-text">
+              <span class="highlight-value">30+</span>
+              <span class="highlight-label">Speakers</span>
+            </div>
+          </div>
+          
+          <div class="highlight-item">
+            <div class="highlight-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+              </svg>
+            </div>
+            <div class="highlight-text">
+              <span class="highlight-value">10+</span>
+              <span class="highlight-label">Workshops</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="conference-cta">
+          <button class="btn btn-large btn-glow" onclick="openRegisterModal()">
+            <span>Register Now</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <button class="btn btn-large btn-ghost" onclick="document.getElementById('agenda').scrollIntoView({behavior: 'smooth'})">
+            <span>View Agenda</span>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Right - Event Card -->
+      <div class="conference-visual">
+        <div class="event-date-card glow-border">
+          <div class="date-header">
+            <span class="date-month">DECEMBER</span>
+            <span class="date-year">2025</span>
+          </div>
+          <div class="date-days">
+            <span class="date-range">1 - 7</span>
+          </div>
+          <div class="date-location">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            <span>Gwalior, Madhya Pradesh</span>
+          </div>
+          <div class="date-badge">
+            <span>India Blockchain Week</span>
+          </div>
+        </div>
+        
+        <div class="floating-tags">
+          <span class="float-tag" style="--delay: 0s;">Web3</span>
+          <span class="float-tag" style="--delay: 0.5s;">DeFi</span>
+          <span class="float-tag" style="--delay: 1s;">NFTs</span>
+          <span class="float-tag" style="--delay: 1.5s;">DAOs</span>
+          <span class="float-tag" style="--delay: 2s;">Blockchain</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Registration Section -->
+<!-- Registration Modal -->
+<div class="modal-overlay" id="registerModal">
+  <div class="modal-container">
+    <button class="modal-close" onclick="closeRegisterModal()">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M18 6L6 18M6 6l12 12"/>
+      </svg>
+    </button>
+    
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="section-tag">Join Us</span>
+        <h2 class="modal-title">Register for <span>IBW Gwalior 2025</span></h2>
+        <p class="modal-description">Secure your spot at India Blockchain Week - Gwalior Edition</p>
+        
+        <div class="ticket-types">
+          <div class="ticket-card" onclick="selectTicket('general')">
+            <span class="ticket-type">General</span>
+            <span class="ticket-price">Free</span>
+            <span class="ticket-note">Limited seats</span>
+          </div>
+          <div class="ticket-card featured" onclick="selectTicket('builder')">
+            <span class="ticket-badge">Popular</span>
+            <span class="ticket-type">Builder Pass</span>
+            <span class="ticket-price">₹499</span>
+            <span class="ticket-note">Priority + Hackathon</span>
+          </div>
+        </div>
+      </div>
+      
+      <form class="register-form" id="registrationForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="firstName">First Name *</label>
+            <input type="text" id="firstName" name="firstName" placeholder="John" required>
+          </div>
+          <div class="form-group">
+            <label for="lastName">Last Name *</label>
+            <input type="text" id="lastName" name="lastName" placeholder="Doe" required>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="email">Email Address *</label>
+          <input type="email" id="email" name="email" placeholder="john@example.com" required>
+        </div>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="phone">Phone Number *</label>
+            <input type="tel" id="phone" name="phone" placeholder="+91 98765 43210" required>
+          </div>
+          <div class="form-group">
+            <label for="role">Your Role *</label>
+            <select id="role" name="role" required>
+              <option value="">Select role</option>
+              <option value="developer">Developer</option>
+              <option value="designer">Designer</option>
+              <option value="founder">Founder / CEO</option>
+              <option value="student">Student</option>
+              <option value="investor">Investor</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        </div>
+        
+        <input type="hidden" id="ticketType" name="ticketType" value="general">
+        
+        <div class="form-group">
+          <label class="checkbox-item terms">
+            <input type="checkbox" name="terms" required>
+            <span>I agree to the <a href="#">Terms</a> and <a href="#">Privacy Policy</a></span>
+          </label>
+        </div>
+        
+        <button type="submit" class="btn btn-large btn-glow form-submit">
+          <span>Complete Registration</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Services Section -->
+<section class="services" id="services">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">What We Do</span>
+      <h2 class="section-title">Our Services</h2>
+    </div>
+    
+    <div class="services-list">
+      <div class="service-item">
+        <div class="service-number">01</div>
+        <div class="service-content">
+          <h3>Smart Contract Development</h3>
+          <p>Custom smart contract solutions for DeFi, NFTs, and DAOs built with security-first approach.</p>
+        </div>
+        <div class="service-arrow">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+            <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+      
+      <div class="service-item">
+        <div class="service-number">02</div>
+        <div class="service-content">
+          <h3>DApp Development</h3>
+          <p>Full-stack decentralized applications with seamless Web3 integration and beautiful UX.</p>
+        </div>
+        <div class="service-arrow">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+            <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+      
+      <div class="service-item">
+        <div class="service-number">03</div>
+        <div class="service-content">
+          <h3>Blockchain Consulting</h3>
+          <p>Strategic guidance for businesses looking to integrate blockchain technology into their operations.</p>
+        </div>
+        <div class="service-arrow">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+            <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+      
+      <div class="service-item">
+        <div class="service-number">04</div>
+        <div class="service-content">
+          <h3>Tokenomics Design</h3>
+          <p>Comprehensive token economic models designed for sustainable growth and community incentives.</p>
+        </div>
+        <div class="service-arrow">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+            <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+      
+      <div class="service-item">
+        <div class="service-number">05</div>
+        <div class="service-content">
+          <h3>Security Audits</h3>
+          <p>Thorough code reviews and vulnerability assessments to ensure your protocol is battle-tested.</p>
+        </div>
+        <div class="service-arrow">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+            <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Projects Showcase -->
+<section class="projects" id="projects">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">Portfolio</span>
+      <h2 class="section-title">Featured Projects</h2>
+    </div>
+    
+    <div class="projects-grid">
+      <div class="project-card large">
+        <div class="project-image">
+          <div class="project-placeholder" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <span>DeFi Protocol</span>
+          </div>
+        </div>
+        <div class="project-info">
+          <span class="project-category">DeFi</span>
+          <h3>NexusSwap</h3>
+          <p>Decentralized exchange with automated market making and yield optimization.</p>
+        </div>
+      </div>
+      
+      <div class="project-card">
+        <div class="project-image">
+          <div class="project-placeholder" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+            <span>NFT</span>
+          </div>
+        </div>
+        <div class="project-info">
+          <span class="project-category">NFT Marketplace</span>
+          <h3>ArtChain</h3>
+          <p>Creator-first NFT platform with royalty protection.</p>
+        </div>
+      </div>
+      
+      <div class="project-card">
+        <div class="project-image">
+          <div class="project-placeholder" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+            <span>DAO</span>
+          </div>
+        </div>
+        <div class="project-info">
+          <span class="project-category">Governance</span>
+          <h3>VoteX</h3>
+          <p>On-chain voting with quadratic mechanisms.</p>
+        </div>
+      </div>
+      
+      <div class="project-card wide">
+        <div class="project-image">
+          <div class="project-placeholder" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+            <span>Infrastructure</span>
+          </div>
+        </div>
+        <div class="project-info">
+          <span class="project-category">Infrastructure</span>
+          <h3>ChainBridge</h3>
+          <p>Cross-chain bridge enabling seamless asset transfers between networks.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Community Section -->
+<section class="community" id="community">
+  <div class="container">
+    <div class="community-content">
+      <div class="community-text">
+        <span class="section-tag">Join Us</span>
+        <h2 class="section-title">Be Part of the Revolution</h2>
+        <p>Connect with thousands of builders, creators, and visionaries who are shaping the decentralized future. Get access to exclusive events, grants, and collaboration opportunities.</p>
+        
+        <div class="community-features">
+          <div class="feature">
+            <div class="feature-check">✓</div>
+            <span>Governance voting rights</span>
+          </div>
+          <div class="feature">
+            <div class="feature-check">✓</div>
+            <span>Access to private channels</span>
+          </div>
+          <div class="feature">
+            <div class="feature-check">✓</div>
+            <span>Grant opportunities</span>
+          </div>
+          <div class="feature">
+            <div class="feature-check">✓</div>
+            <span>Exclusive events & AMAs</span>
+          </div>
+        </div>
+        
+        <div class="community-buttons">
+          <button class="btn btn-large btn-glow" onclick="window.open('https://discord.gg/', '_blank')">
+            <span>Join Discord</span>
+          </button>
+          <button class="btn btn-large btn-ghost" onclick="window.open('#', '_blank')">
+            <span>Read Whitepaper</span>
+          </button>
+        </div>
+      </div>
+      
+      <div class="community-visual">
+        <div class="visual-blob"></div>
+        <div class="community-avatars">
+          <div class="avatar-ring ring-1">
+            <div class="avatar" style="--delay: 0s;"></div>
+            <div class="avatar" style="--delay: 0.5s;"></div>
+            <div class="avatar" style="--delay: 1s;"></div>
+            <div class="avatar" style="--delay: 1.5s;"></div>
+          </div>
+          <div class="avatar-ring ring-2">
+            <div class="avatar" style="--delay: 0.25s;"></div>
+            <div class="avatar" style="--delay: 0.75s;"></div>
+            <div class="avatar" style="--delay: 1.25s;"></div>
+            <div class="avatar" style="--delay: 1.75s;"></div>
+            <div class="avatar" style="--delay: 2.25s;"></div>
+            <div class="avatar" style="--delay: 2.75s;"></div>
+          </div>
+          <div class="center-logo">
+            <span>G</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <h2 class="footer-logo">GWL<span>DAO</span></h2>
+        <p>Shaping the next wave of decentralization in Gwalior.</p>
+        <div class="footer-socials">
+          <a href="#" class="social-link">Twitter</a>
+          <a href="#" class="social-link">Discord</a>
+          <a href="#" class="social-link">Telegram</a>
+          <a href="#" class="social-link">LinkedIn</a>
+        </div>
+      </div>
+      
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>Events</h4>
+          <a href="#">GWL Conference</a>
+          <a href="#">Hackathons</a>
+          <a href="#">Meetups</a>
+          <a href="#">Campus Connects</a>
+        </div>
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <a href="#">Documentation</a>
+          <a href="#">Whitepaper</a>
+          <a href="#">Blog</a>
+          <a href="#">Brand Kit</a>
+        </div>
+        <div class="footer-col">
+          <h4>Community</h4>
+          <a href="#">Discord</a>
+          <a href="#">Governance</a>
+          <a href="#">Contributors</a>
+          <a href="#">Partners</a>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <p>© 2026 GWL DAO - Gwalior. All rights reserved.</p>
+      <div class="footer-legal">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="js/script.js"></script>
+</body>
+</html>

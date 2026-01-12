@@ -1,0 +1,4417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>GWL DAO | Gwalior Web3 Collective</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  
+  <!-- Three.js for 3D Scene -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    :root {
+      --bg: #050505;
+      --surface: #0a0a0a;
+      --surface-2: #111111;
+      --text: #ffffff;
+      --text-dim: #888888;
+      --text-muted: #555555;
+      --gradient-1: #ff6b6b;
+      --gradient-2: #feca57;
+      --gradient-3: #48dbfb;
+      --gradient-4: #ff9ff3;
+      --gradient-5: #54a0ff;
+    }
+    
+    html {
+      scroll-behavior: smooth;
+      overflow-x: hidden;
+      max-width: 100vw;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      max-width: 100%;
+      cursor: none;
+    }
+    
+    /* Smooth scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(var(--gradient-1), var(--gradient-4));
+      border-radius: 4px;
+    }
+    
+    /* === FLUID BLOB CURSOR === */
+    .cursor-blob {
+      position: fixed;
+      width: 24px;
+      height: 24px;
+      background: linear-gradient(135deg, var(--gradient-1), var(--gradient-2));
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 100000;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+      transition: width 0.3s, height 0.3s, background 0.3s;
+    }
+    
+    .cursor-blob.hover {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, var(--gradient-2), var(--gradient-3));
+      mix-blend-mode: difference;
+    }
+    
+    /* SVG Filter for gooey effect */
+    .svg-filters {
+      position: absolute;
+      width: 0;
+      height: 0;
+    }
+    
+    /* === LOADER === */
+    .loader {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 3rem;
+    }
+    
+    .loader-logo {
+      font-size: clamp(4rem, 15vw, 10rem);
+      font-weight: 900;
+      letter-spacing: -0.05em;
+      background: linear-gradient(135deg, var(--gradient-1), var(--gradient-2), var(--gradient-3));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      opacity: 0;
+      transform: scale(0.8);
+    }
+    
+    .loader-progress {
+      width: 200px;
+      height: 2px;
+      background: var(--surface-2);
+      border-radius: 2px;
+      overflow: hidden;
+      opacity: 0;
+    }
+    
+    .loader-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--gradient-1), var(--gradient-2));
+      border-radius: 2px;
+    }
+    
+    .loader-text {
+      font-size: 0.75rem;
+      letter-spacing: 0.5em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      opacity: 0;
+    }
+    
+    /* === NAV === */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 1.5rem 3rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1000;
+      background: linear-gradient(to bottom, rgba(5,5,5,0.9) 0%, transparent 100%);
+    }
+    
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    
+    .nav-logo span {
+      background: linear-gradient(135deg, var(--gradient-1), var(--gradient-2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .nav-links {
+      display: flex;
+      gap: 2.5rem;
+    }
+    
+    .nav-links a {
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      position: relative;
+      transition: color 0.3s ease;
+    }
+    
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--gradient-1), var(--gradient-2));
+      transition: width 0.3s ease;
+    }
+    
+    .nav-links a:hover {
+      color: var(--text);
+    }
+    
+    .nav-links a:hover::after {
+      width: 100%;
+    }
+    
+    .nav-cta {
+      padding: 0.75rem 1.5rem;
+      background: linear-gradient(135deg, var(--gradient-1), var(--gradient-2));
+      border: none;
+      border-radius: 100px;
+      color: var(--bg);
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: none;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .nav-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 40px rgba(255, 107, 107, 0.3);
+    }
+    
+    /* Mobile Menu Button */
+    .mobile-menu-btn {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 5px;
+      z-index: 1001;
+    }
+    
+    .mobile-menu-btn span {
+      display: block;
+      width: 25px;
+      height: 2px;
+      background: var(--text);
+      transition: all 0.3s ease;
+    }
+    
+    .mobile-menu-btn.active span:nth-child(1) {
+      transform: rotate(45deg) translate(5px, 5px);
+    }
+    
+    .mobile-menu-btn.active span:nth-child(2) {
+      opacity: 0;
+    }
+    
+    .mobile-menu-btn.active span:nth-child(3) {
+      transform: rotate(-45deg) translate(5px, -5px);
+    }
+    
+    /* Mobile Menu */
+    .mobile-menu {
+      position: fixed;
+      top: 0;
+      right: -100%;
+      width: 100%;
+      height: 100vh;
+      background: var(--bg);
+      z-index: 999;
+      transition: right 0.4s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .mobile-menu.active {
+      right: 0;
+    }
+    
+    .mobile-menu-links {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+    }
+    
+    .mobile-menu-links a {
+      color: var(--text);
+      text-decoration: none;
+      font-size: 1.5rem;
+      font-weight: 600;
+      transition: color 0.3s ease;
+    }
+    
+    .mobile-menu-links a:hover {
+      color: var(--gradient-1);
+    }
+    
+    @media (max-width: 900px) {
+      .mobile-menu-btn { display: flex; }
+      .nav-links, .nav-cta { display: none; }
+    }
+    
+    /* === HERO === */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      padding: 2rem;
+      overflow: hidden;
+      background: radial-gradient(ellipse at 50% 100%, #1a1a2e 0%, #0a0a0f 40%, #050505 100%);
+    }
+    
+    #hero3D {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+    
+    /* === SPACE ENVIRONMENT === */
+    .space-bg {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    
+    /* Stars Layers */
+    .stars, .stars2, .stars3 {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-repeat: repeat;
+    }
+    
+    .stars {
+      background-image: 
+        radial-gradient(2px 2px at 20px 30px, #fff, transparent),
+        radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
+        radial-gradient(1px 1px at 90px 40px, #fff, transparent),
+        radial-gradient(2px 2px at 160px 120px, rgba(255,255,255,0.9), transparent),
+        radial-gradient(1px 1px at 230px 80px, #fff, transparent),
+        radial-gradient(2px 2px at 300px 150px, rgba(255,255,255,0.7), transparent),
+        radial-gradient(1px 1px at 350px 200px, #fff, transparent),
+        radial-gradient(2px 2px at 420px 50px, rgba(255,255,255,0.8), transparent),
+        radial-gradient(1px 1px at 500px 180px, #fff, transparent),
+        radial-gradient(2px 2px at 580px 90px, rgba(255,255,255,0.9), transparent);
+      background-size: 600px 300px;
+      animation: starsMove 100s linear infinite;
+    }
+    
+    .stars2 {
+      background-image: 
+        radial-gradient(1px 1px at 50px 100px, rgba(255,255,255,0.6), transparent),
+        radial-gradient(1px 1px at 120px 200px, rgba(255,255,255,0.5), transparent),
+        radial-gradient(1px 1px at 200px 50px, rgba(255,255,255,0.7), transparent),
+        radial-gradient(1px 1px at 280px 150px, rgba(255,255,255,0.4), transparent),
+        radial-gradient(1px 1px at 350px 250px, rgba(255,255,255,0.6), transparent),
+        radial-gradient(1px 1px at 450px 100px, rgba(255,255,255,0.5), transparent);
+      background-size: 500px 300px;
+      animation: starsMove 150s linear infinite;
+    }
+    
+    .stars3 {
+      background-image: 
+        radial-gradient(1px 1px at 80px 60px, rgba(255,255,255,0.3), transparent),
+        radial-gradient(1px 1px at 180px 160px, rgba(255,255,255,0.4), transparent),
+        radial-gradient(1px 1px at 320px 80px, rgba(255,255,255,0.3), transparent),
+        radial-gradient(1px 1px at 400px 220px, rgba(255,255,255,0.5), transparent);
+      background-size: 450px 280px;
+      animation: starsMove 200s linear infinite;
+    }
+    
+    @keyframes starsMove {
+      from { transform: translateY(0); }
+      to { transform: translateY(-300px); }
+    }
+    
+    /* Twinkling Stars */
+    .twinkle-stars {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+    }
+    
+    .twinkle {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      background: #fff;
+      border-radius: 50%;
+      animation: twinkle 3s ease-in-out infinite;
+      box-shadow: 0 0 6px #fff, 0 0 10px rgba(255,255,255,0.5);
+    }
+    
+    .twinkle:nth-child(1) { top: 8%; left: 5%; animation-delay: 0s; }
+    .twinkle:nth-child(2) { top: 15%; left: 92%; animation-delay: 0.5s; }
+    .twinkle:nth-child(3) { top: 25%; left: 3%; animation-delay: 1s; }
+    .twinkle:nth-child(4) { top: 45%; left: 95%; animation-delay: 1.5s; }
+    .twinkle:nth-child(5) { top: 60%; left: 8%; animation-delay: 2s; }
+    .twinkle:nth-child(6) { top: 75%; left: 88%; animation-delay: 0.3s; }
+    .twinkle:nth-child(7) { top: 85%; left: 4%; animation-delay: 0.8s; }
+    .twinkle:nth-child(8) { top: 30%; left: 7%; animation-delay: 1.3s; }
+    .twinkle:nth-child(9) { top: 50%; left: 90%; animation-delay: 1.8s; }
+    .twinkle:nth-child(10) { top: 90%; left: 93%; animation-delay: 2.3s; }
+    .twinkle:nth-child(11) { top: 12%; left: 50%; animation-delay: 0.2s; }
+    .twinkle:nth-child(12) { top: 70%; left: 15%; animation-delay: 1.1s; }
+    .twinkle:nth-child(13) { top: 40%; left: 85%; animation-delay: 1.6s; }
+    .twinkle:nth-child(14) { top: 55%; left: 2%; animation-delay: 2.1s; }
+    .twinkle:nth-child(15) { top: 20%; left: 97%; animation-delay: 0.7s; }
+    
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.3; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.5); }
+    }
+    
+    /* Nebula Effects */
+    .nebula {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.4;
+      mix-blend-mode: screen;
+    }
+    
+    .nebula-1 {
+      width: 800px;
+      height: 800px;
+      background: radial-gradient(circle, rgba(255, 107, 107, 0.4) 0%, rgba(255, 150, 100, 0.2) 40%, transparent 70%);
+      top: -20%;
+      left: -15%;
+      animation: nebulaFloat 30s ease-in-out infinite;
+    }
+    
+    .nebula-2 {
+      width: 700px;
+      height: 700px;
+      background: radial-gradient(circle, rgba(72, 219, 251, 0.35) 0%, rgba(100, 200, 255, 0.15) 40%, transparent 70%);
+      bottom: -15%;
+      right: -10%;
+      animation: nebulaFloat 25s ease-in-out infinite reverse;
+    }
+    
+    .nebula-3 {
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(255, 159, 243, 0.3) 0%, rgba(200, 100, 255, 0.15) 40%, transparent 70%);
+      top: 20%;
+      right: 5%;
+      animation: nebulaFloat 35s ease-in-out infinite;
+      animation-delay: -10s;
+    }
+    
+    .nebula-4 {
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(254, 202, 87, 0.25) 0%, rgba(255, 180, 50, 0.1) 40%, transparent 70%);
+      bottom: 20%;
+      left: -5%;
+      animation: nebulaFloat 40s ease-in-out infinite;
+      animation-delay: -15s;
+    }
+    
+    @keyframes nebulaFloat {
+      0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.4; }
+      33% { transform: translate(30px, -20px) scale(1.1); opacity: 0.5; }
+      66% { transform: translate(-20px, 30px) scale(0.9); opacity: 0.35; }
+    }
+    
+    /* Floating Planet */
+    .planet {
+      position: absolute;
+      border-radius: 50%;
+      z-index: 2;
+    }
+    
+    .planet-1 {
+      width: 80px;
+      height: 80px;
+      top: 35%;
+      left: 8%;
+      background: radial-gradient(circle at 30% 30%, #ff9966, #ff5e62);
+      box-shadow: 
+        inset -15px -15px 30px rgba(0,0,0,0.5),
+        0 0 40px rgba(255, 94, 98, 0.4),
+        0 0 80px rgba(255, 94, 98, 0.2);
+      animation: planetFloat 20s ease-in-out infinite;
+    }
+    
+    .planet-1::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: -30%;
+      width: 160%;
+      height: 10px;
+      background: linear-gradient(90deg, transparent, rgba(255,200,150,0.3), transparent);
+      transform: rotate(-15deg);
+      border-radius: 50%;
+    }
+    
+    .planet-2 {
+      width: 50px;
+      height: 50px;
+      top: 20%;
+      right: 12%;
+      background: radial-gradient(circle at 30% 30%, #667eea, #764ba2);
+      box-shadow: 
+        inset -8px -8px 16px rgba(0,0,0,0.5),
+        0 0 25px rgba(102, 126, 234, 0.4);
+      animation: planetFloat 15s ease-in-out infinite reverse;
+    }
+    
+    .planet-3 {
+      width: 30px;
+      height: 30px;
+      bottom: 30%;
+      right: 6%;
+      background: radial-gradient(circle at 30% 30%, #48dbfb, #0abde3);
+      box-shadow: 
+        inset -5px -5px 10px rgba(0,0,0,0.5),
+        0 0 20px rgba(72, 219, 251, 0.4);
+      animation: planetFloat 12s ease-in-out infinite;
+      animation-delay: -3s;
+    }
+    
+    .planet-4 {
+      width: 25px;
+      height: 25px;
+      top: 60%;
+      left: 5%;
+      background: radial-gradient(circle at 30% 30%, #feca57, #ff9f43);
+      box-shadow: 
+        inset -4px -4px 8px rgba(0,0,0,0.5),
+        0 0 15px rgba(254, 202, 87, 0.4);
+      animation: planetFloat 18s ease-in-out infinite reverse;
+      animation-delay: -5s;
+    }
+    
+    @keyframes planetFloat {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(5deg); }
+    }
+    
+    /* Shooting Stars */
+    .shooting-star {
+      position: absolute;
+      width: 150px;
+      height: 2px;
+      background: linear-gradient(90deg, #fff, transparent);
+      opacity: 0;
+      animation: shoot 4s ease-in-out infinite;
+    }
+    
+    .shooting-star:nth-child(1) {
+      top: 15%;
+      left: 0%;
+      animation-delay: 0s;
+    }
+    
+    .shooting-star:nth-child(2) {
+      top: 35%;
+      right: 0%;
+      left: auto;
+      animation-delay: 2s;
+      animation-name: shootReverse;
+    }
+    
+    .shooting-star:nth-child(3) {
+      top: 55%;
+      left: 5%;
+      animation-delay: 4s;
+    }
+    
+    .shooting-star:nth-child(4) {
+      top: 75%;
+      right: 0%;
+      left: auto;
+      animation-delay: 6s;
+      animation-name: shootReverse;
+    }
+    
+    @keyframes shoot {
+      0% { transform: translateX(0) translateY(0) rotate(-45deg); opacity: 0; }
+      5% { opacity: 1; }
+      30% { transform: translateX(400px) translateY(400px) rotate(-45deg); opacity: 0; }
+      100% { opacity: 0; }
+    }
+    
+    @keyframes shootReverse {
+      0% { transform: translateX(0) translateY(0) rotate(225deg); opacity: 0; }
+      5% { opacity: 1; }
+      30% { transform: translateX(-400px) translateY(400px) rotate(225deg); opacity: 0; }
+      100% { opacity: 0; }
+    }
+    
+    /* Space Grid Floor */
+    .space-grid {
+      position: absolute;
+      bottom: 0;
+      left: -50%;
+      width: 200%;
+      height: 40%;
+      background: 
+        linear-gradient(90deg, rgba(255, 107, 107, 0.08) 1px, transparent 1px),
+        linear-gradient(rgba(255, 107, 107, 0.08) 1px, transparent 1px);
+      background-size: 60px 60px;
+      transform: perspective(500px) rotateX(65deg);
+      transform-origin: center top;
+      mask-image: linear-gradient(to top, rgba(0,0,0,0.4) 0%, transparent 70%);
+      animation: gridMove 30s linear infinite;
+    }
+    
+    @keyframes gridMove {
+      from { background-position: 0 0; }
+      to { background-position: 50px 50px; }
+    }
+    
+    /* Floating Particles */
+    .space-particles {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      z-index: 3;
+    }
+    
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: rgba(255, 107, 107, 0.8);
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+      animation: particleFloat 10s ease-in-out infinite;
+    }
+    
+    .particle:nth-child(1) { top: 15%; left: 5%; animation-delay: 0s; animation-duration: 8s; background: rgba(254, 202, 87, 0.8); box-shadow: 0 0 10px rgba(254, 202, 87, 0.5); }
+    .particle:nth-child(2) { top: 25%; left: 92%; animation-delay: 1s; animation-duration: 12s; background: rgba(255, 107, 107, 0.8); box-shadow: 0 0 10px rgba(255, 107, 107, 0.5); }
+    .particle:nth-child(3) { top: 55%; left: 3%; animation-delay: 2s; animation-duration: 10s; background: rgba(72, 219, 251, 0.8); box-shadow: 0 0 10px rgba(72, 219, 251, 0.5); }
+    .particle:nth-child(4) { top: 75%; left: 95%; animation-delay: 3s; animation-duration: 14s; background: rgba(254, 202, 87, 0.8); box-shadow: 0 0 10px rgba(254, 202, 87, 0.5); }
+    .particle:nth-child(5) { top: 40%; left: 8%; animation-delay: 4s; animation-duration: 9s; background: rgba(255, 159, 243, 0.8); box-shadow: 0 0 10px rgba(255, 159, 243, 0.5); }
+    .particle:nth-child(6) { top: 65%; left: 88%; animation-delay: 5s; animation-duration: 11s; background: rgba(72, 219, 251, 0.8); box-shadow: 0 0 10px rgba(72, 219, 251, 0.5); }
+    .particle:nth-child(7) { top: 85%; left: 6%; animation-delay: 2.5s; animation-duration: 13s; background: rgba(255, 107, 107, 0.8); box-shadow: 0 0 10px rgba(255, 107, 107, 0.5); }
+    .particle:nth-child(8) { top: 10%; left: 90%; animation-delay: 3.5s; animation-duration: 15s; background: rgba(255, 159, 243, 0.8); box-shadow: 0 0 10px rgba(255, 159, 243, 0.5); }
+    .particle:nth-child(9) { top: 35%; left: 96%; animation-delay: 1.5s; animation-duration: 10s; background: rgba(254, 202, 87, 0.8); box-shadow: 0 0 10px rgba(254, 202, 87, 0.5); }
+    .particle:nth-child(10) { top: 50%; left: 2%; animation-delay: 4.5s; animation-duration: 12s; background: rgba(255, 107, 107, 0.8); box-shadow: 0 0 10px rgba(255, 107, 107, 0.5); }
+    .particle:nth-child(11) { top: 80%; left: 94%; animation-delay: 0.5s; animation-duration: 11s; background: rgba(72, 219, 251, 0.8); box-shadow: 0 0 10px rgba(72, 219, 251, 0.5); }
+    .particle:nth-child(12) { top: 20%; left: 4%; animation-delay: 2.8s; animation-duration: 14s; background: rgba(254, 202, 87, 0.8); box-shadow: 0 0 10px rgba(254, 202, 87, 0.5); }
+    
+    @keyframes particleFloat {
+      0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.8; }
+      25% { transform: translate(20px, -30px) scale(1.2); opacity: 1; }
+      50% { transform: translate(-10px, -50px) scale(0.8); opacity: 0.6; }
+      75% { transform: translate(30px, -20px) scale(1.1); opacity: 0.9; }
+    }
+    
+    /* Hologram Platform */
+    .hologram-platform {
+      position: absolute;
+      bottom: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 120%;
+      height: 40px;
+      z-index: 0;
+    }
+    
+    .platform-ring {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      border-radius: 50%;
+      border: 2px solid rgba(72, 219, 251, 0.3);
+      animation: platformPulse 3s ease-in-out infinite;
+    }
+    
+    .platform-ring:nth-child(1) {
+      bottom: 0;
+      width: 100%;
+      height: 30px;
+      animation-delay: 0s;
+    }
+    
+    .platform-ring:nth-child(2) {
+      bottom: 5px;
+      width: 80%;
+      height: 25px;
+      animation-delay: 0.3s;
+    }
+    
+    .platform-ring:nth-child(3) {
+      bottom: 10px;
+      width: 60%;
+      height: 20px;
+      animation-delay: 0.6s;
+    }
+    
+    .platform-glow {
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      height: 20px;
+      background: radial-gradient(ellipse at center, rgba(72, 219, 251, 0.4) 0%, transparent 70%);
+      filter: blur(10px);
+    }
+    
+    @keyframes platformPulse {
+      0%, 100% { opacity: 0.3; transform: translateX(-50%) scale(1); }
+      50% { opacity: 0.7; transform: translateX(-50%) scale(1.05); }
+    }
+
+    /* YouTube Hologram Frame */
+    .hologram-video-container {
+      position: relative;
+      z-index: 4;
+      width: 100%;
+      max-width: 450px;
+      height: 300px;
+      perspective: 1000px;
+      margin: 0 auto 2rem;
+      transform-style: preserve-3d;
+    }
+    
+    .hologram-video-frame {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border-radius: 20px;
+      overflow: hidden;
+      background: rgba(72, 219, 251, 0.05);
+      border: 2px solid rgba(72, 219, 251, 0.3);
+      box-shadow: 
+        0 0 30px rgba(72, 219, 251, 0.3),
+        0 0 60px rgba(72, 219, 251, 0.2),
+        0 0 90px rgba(72, 219, 251, 0.1),
+        inset 0 0 30px rgba(72, 219, 251, 0.1);
+      animation: hologramPulse 3s ease-in-out infinite, hologramHover 6s ease-in-out infinite;
+      transform-style: preserve-3d;
+    }
+    
+    @keyframes hologramHover {
+      0%, 100% { transform: rotateX(2deg) translateY(0); }
+      50% { transform: rotateX(-2deg) translateY(-10px); }
+    }
+    
+    .hologram-video-frame::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(
+        45deg,
+        transparent 40%,
+        rgba(72, 219, 251, 0.1) 50%,
+        transparent 60%
+      );
+      animation: hologramSweep 4s linear infinite;
+      pointer-events: none;
+      z-index: 10;
+    }
+    
+    .hologram-video-frame::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(72, 219, 251, 0.03) 2px,
+        rgba(72, 219, 251, 0.03) 4px
+      );
+      pointer-events: none;
+      z-index: 11;
+    }
+    
+    .hologram-video-frame iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      filter: saturate(1.2) brightness(1.1);
+    }
+    
+    /* Hologram Corner Brackets */
+    .hologram-corner {
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      border: 2px solid rgba(72, 219, 251, 0.8);
+      z-index: 12;
+    }
+    
+    .hologram-corner.top-left {
+      top: -5px;
+      left: -5px;
+      border-right: none;
+      border-bottom: none;
+    }
+    
+    .hologram-corner.top-right {
+      top: -5px;
+      right: -5px;
+      border-left: none;
+      border-bottom: none;
+    }
+    
+    .hologram-corner.bottom-left {
+      bottom: -5px;
+      left: -5px;
+      border-right: none;
+      border-top: none;
+    }
+    
+    .hologram-corner.bottom-right {
+      bottom: -5px;
+      right: -5px;
+      border-left: none;
+      border-top: none;
+    }
+    
+    /* Hologram Ring */
+    .hologram-ring {
+      position: absolute;
+      bottom: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      height: 20px;
+      background: radial-gradient(ellipse at center, rgba(72, 219, 251, 0.4) 0%, transparent 70%);
+      border-radius: 50%;
+      filter: blur(5px);
+    }
+    
+    .hologram-ring-top {
+      position: absolute;
+      top: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      height: 20px;
+      background: radial-gradient(ellipse at center, rgba(72, 219, 251, 0.3) 0%, transparent 70%);
+      border-radius: 50%;
+      filter: blur(5px);
+    }
+    
+    /* Hologram Beam Effect */
+    .hologram-beam {
+      position: absolute;
+      bottom: -60px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60%;
+      height: 120%;
+      background: linear-gradient(
+        to top,
+        rgba(72, 219, 251, 0.2) 0%,
+        rgba(72, 219, 251, 0.05) 30%,
+        transparent 100%
+      );
+      clip-path: polygon(20% 100%, 80% 100%, 55% 0%, 45% 0%);
+      pointer-events: none;
+      z-index: -1;
+      animation: beamPulse 3s ease-in-out infinite;
+    }
+    
+    @keyframes beamPulse {
+      0%, 100% { opacity: 0.6; }
+      50% { opacity: 1; }
+    }
+    
+    /* Hologram Glow Lines */
+    .hologram-glow-line {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2px;
+      background: linear-gradient(to bottom, transparent, rgba(72, 219, 251, 0.5), transparent);
+      z-index: 0;
+    }
+    
+    .hologram-glow-line.top {
+      bottom: 100%;
+      height: 80px;
+    }
+    
+    .hologram-glow-line.bottom {
+      top: 100%;
+      height: 80px;
+    }
+    
+    /* Floating Data Points */
+    .hologram-data-points {
+      position: absolute;
+      inset: -50px;
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    .data-point {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: rgba(72, 219, 251, 0.8);
+      border-radius: 50%;
+      animation: dataFloat 3s ease-in-out infinite;
+    }
+    
+    .data-point:nth-child(1) { top: 10%; left: -20px; animation-delay: 0s; }
+    .data-point:nth-child(2) { top: 30%; left: -30px; animation-delay: 0.5s; }
+    .data-point:nth-child(3) { top: 50%; left: -25px; animation-delay: 1s; }
+    .data-point:nth-child(4) { top: 70%; left: -35px; animation-delay: 1.5s; }
+    .data-point:nth-child(5) { top: 90%; left: -20px; animation-delay: 2s; }
+    .data-point:nth-child(6) { top: 10%; right: -20px; animation-delay: 0.3s; }
+    .data-point:nth-child(7) { top: 30%; right: -30px; animation-delay: 0.8s; }
+    .data-point:nth-child(8) { top: 50%; right: -25px; animation-delay: 1.3s; }
+    .data-point:nth-child(9) { top: 70%; right: -35px; animation-delay: 1.8s; }
+    .data-point:nth-child(10) { top: 90%; right: -20px; animation-delay: 2.3s; }
+    
+    @keyframes hologramPulse {
+      0%, 100% { box-shadow: 0 0 30px rgba(72, 219, 251, 0.3), 0 0 60px rgba(72, 219, 251, 0.2), 0 0 90px rgba(72, 219, 251, 0.1), inset 0 0 30px rgba(72, 219, 251, 0.1); }
+      50% { box-shadow: 0 0 40px rgba(72, 219, 251, 0.4), 0 0 80px rgba(72, 219, 251, 0.3), 0 0 120px rgba(72, 219, 251, 0.15), inset 0 0 40px rgba(72, 219, 251, 0.15); }
+    }
+    
+    @keyframes hologramSweep {
+      0% { transform: translateX(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) rotate(45deg); }
+    }
+    
+    @keyframes dataFloat {
+      0%, 100% { transform: translateY(0) scale(1); opacity: 0.8; }
+      50% { transform: translateY(-10px) scale(1.2); opacity: 1; }
+    }
+    
+    @media (max-width: 1200px) {
+      .hologram-video-container {
+        max-width: 380px;
+        height: 250px;
+      }
+      .hero-content {
+        max-width: 500px;
+      }
+    }
+    
+    @media (max-width: 992px) {
+      .hologram-video-container {
+        width: 90%;
+        max-width: 450px;
+        height: 280px;
+      }
+      .hero-content {
+        max-width: 100%;
+      }
+      .hero {
+        flex-direction: column;
+        justify-content: center;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      .hologram-video-container {
+        width: 95%;
+        max-width: 320px;
+        height: 200px;
+      }
+    }
+    
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      z-index: 0;
+      pointer-events: none;
+      display: none;
+    }
+    
+    .hero-video {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      min-width: 100%;
+      min-height: 100%;
+      width: auto;
+      height: auto;
+      transform: translate(-50%, -50%);
+      object-fit: cover;
+      z-index: 0;
+      opacity: 0;
+      display: none;
+    }
+    
+    .hero-video-overlay {
+      position: absolute;
+      inset: 0;
+      background: transparent;
+      z-index: 1;
+      pointer-events: none;
+    }
+    
+    /* Floating Blobs */
+    .floating-blobs {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      filter: url(#goo);
+      overflow: hidden;
+      pointer-events: none;
+      opacity: 0.4;
+    }
+    
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(40px);
+      opacity: 0.6;
+      animation: blobFloat 20s ease-in-out infinite;
+    }
+    
+    .blob-1 {
+      width: 300px;
+      height: 300px;
+      background: var(--gradient-1);
+      top: 10%;
+      left: 10%;
+      animation-delay: 0s;
+    }
+    
+    .blob-2 {
+      width: 250px;
+      height: 250px;
+      background: var(--gradient-2);
+      top: 60%;
+      right: 10%;
+      animation-delay: -5s;
+      animation-duration: 25s;
+    }
+    
+    .blob-3 {
+      width: 200px;
+      height: 200px;
+      background: var(--gradient-3);
+      bottom: 20%;
+      left: 30%;
+      animation-delay: -10s;
+      animation-duration: 18s;
+    }
+    
+    .blob-4 {
+      width: 180px;
+      height: 180px;
+      background: var(--gradient-4);
+      top: 30%;
+      right: 25%;
+      animation-delay: -7s;
+      animation-duration: 22s;
+    }
+    
+    .blob-5 {
+      width: 220px;
+      height: 220px;
+      background: var(--gradient-5);
+      bottom: 10%;
+      right: 30%;
+      animation-delay: -3s;
+      animation-duration: 28s;
+    }
+    
+    @keyframes blobFloat {
+      0%, 100% {
+        transform: translate(0, 0) scale(1);
+      }
+      25% {
+        transform: translate(50px, -50px) scale(1.1);
+      }
+      50% {
+        transform: translate(-30px, 30px) scale(0.9);
+      }
+      75% {
+        transform: translate(40px, 20px) scale(1.05);
+      }
+    }
+    
+    .hero-gradient {
+      position: absolute;
+      width: 800px;
+      height: 800px;
+      border-radius: 50%;
+      filter: blur(120px);
+      opacity: 0.15;
+    }
+    
+    .hero-gradient-1 {
+      top: -20%;
+      left: -10%;
+      background: var(--gradient-1);
+      animation: float1 20s ease-in-out infinite;
+    }
+    
+    .hero-gradient-2 {
+      bottom: -30%;
+      right: -10%;
+      background: var(--gradient-3);
+      animation: float2 25s ease-in-out infinite;
+    }
+    
+    .hero-gradient-3 {
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 600px;
+      height: 600px;
+      background: var(--gradient-4);
+      animation: float3 18s ease-in-out infinite;
+    }
+    
+    @keyframes float1 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(100px, 50px) scale(1.1); }
+    }
+    
+    @keyframes float2 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(-80px, -40px) scale(1.15); }
+    }
+    
+    @keyframes float3 {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); }
+      50% { transform: translate(-40%, -60%) scale(0.9); }
+    }
+    
+    .hero-grid {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 60px 60px;
+      mask-image: radial-gradient(ellipse at center, black 0%, transparent 70%);
+    }
+    
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      max-width: 550px;
+      margin-left: auto;
+      margin-right: auto;
+      padding: 2rem;
+    }
+    
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: rgba(0,0,0,0.6);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 100px;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      margin-bottom: 2rem;
+      backdrop-filter: blur(10px);
+    }
+    
+    .hero-badge-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--gradient-1);
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(1.2); }
+    }
+    
+    .hero-title {
+      font-size: clamp(2.5rem, 8vw, 5rem);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -0.04em;
+      margin-bottom: 1.5rem;
+      text-shadow: 
+        0 0 20px rgba(0,0,0,1),
+        0 0 40px rgba(0,0,0,1),
+        0 0 60px rgba(0,0,0,0.8),
+        0 4px 20px rgba(0,0,0,1);
+    }
+    
+    .hero-title-line {
+      display: block;
+      overflow: hidden;
+    }
+    
+    .hero-title-word {
+      display: inline-block;
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    
+    .hero-title .gradient {
+      background: linear-gradient(135deg, var(--gradient-1), var(--gradient-2), var(--gradient-3));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 20px rgba(255,107,107,0.5)) drop-shadow(0 0 40px rgba(255,170,0,0.3));
+      text-shadow: none;
+    }
+    
+    .hero-subtitle {
+      font-size: clamp(0.95rem, 1.5vw, 1.1rem);
+      color: var(--text-muted);
+      max-width: 450px;
+      margin: 0 auto 2rem auto;
+      line-height: 1.7;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    
+    .hero-cta-group {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    
+    .btn {
+      padding: 1rem 2rem;
+      border-radius: 100px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: none;
+      transition: all 0.4s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gradient-1), var(--gradient-2));
+      color: var(--bg);
+      border: none;
+    }
+    
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--gradient-2), var(--gradient-3));
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    
+    .btn-primary:hover::before {
+      opacity: 1;
+    }
+    
+    .btn-primary span {
+      position: relative;
+      z-index: 1;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 20px 50px rgba(255, 107, 107, 0.3);
+    }
+    
+    .btn-outline {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    
+    .btn-outline:hover {
+      background: rgba(255,255,255,0.05);
+      border-color: rgba(255,255,255,0.4);
+    }
+    
+    .hero-scroll {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      opacity: 0;
+    }
+    
+    .hero-scroll-text {
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    
+    .hero-scroll-line {
+      width: 1px;
+      height: 40px;
+      background: linear-gradient(to bottom, var(--gradient-1), transparent);
+      animation: scrollLine 2s ease-in-out infinite;
+    }
+    
+    @keyframes scrollLine {
+      0% { transform: scaleY(0); transform-origin: top; }
+      50% { transform: scaleY(1); transform-origin: top; }
+      50.1% { transform-origin: bottom; }
+      100% { transform: scaleY(0); transform-origin: bottom; }
+    }
+    
+    /* === MARQUEE === */
+    .marquee {
+      padding: 2rem 0;
+      background: var(--surface);
+      overflow: hidden;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    .marquee-track {
+      display: flex;
+      gap: 4rem;
+      animation: marquee 30s linear infinite;
+    }
+    
+    .marquee-item {
+      font-size: clamp(1rem, 2vw, 1.5rem);
+      font-weight: 600;
+      color: var(--text-muted);
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 4rem;
+    }
+    
+    .marquee-item span {
+      color: var(--gradient-1);
+    }
+    
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+    
+    /* === ABOUT === */
+    .about {
+      padding: 10rem 3rem;
+      position: relative;
+    }
+    
+    .about-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6rem;
+      align-items: center;
+    }
+    
+    .about-visual {
+      position: relative;
+      aspect-ratio: 1;
+    }
+    
+    .about-circle {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .about-circle-1 {
+      inset: 0;
+      animation: spin 40s linear infinite;
+    }
+    
+    .about-circle-2 {
+      inset: 15%;
+      animation: spin 30s linear infinite reverse;
+    }
+    
+    .about-circle-3 {
+      inset: 30%;
+      animation: spin 20s linear infinite;
+    }
+    
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    .about-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 200px;
+      height: 200px;
+      background: linear-gradient(135deg, var(--gradient-1), var(--gradient-4));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      box-shadow: 0 0 100px rgba(255, 107, 107, 0.3);
+    }
+    
+    .about-orbit {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      background: var(--surface-2);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+    
+    .about-orbit-1 { top: 10%; left: 50%; transform: translateX(-50%); }
+    .about-orbit-2 { top: 50%; right: 5%; transform: translateY(-50%); }
+    .about-orbit-3 { bottom: 10%; left: 50%; transform: translateX(-50%); }
+    .about-orbit-4 { top: 50%; left: 5%; transform: translateY(-50%); }
+    
+    .about-content {
+      padding-right: 2rem;
+    }
+    
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gradient-1);
+      margin-bottom: 1.5rem;
+    }
+    
+    .section-label::before {
+      content: '';
+      width: 30px;
+      height: 1px;
+      background: var(--gradient-1);
+    }
+    
+    .about-title {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 1.5rem;
+      letter-spacing: -0.02em;
+    }
+    
+    .about-text {
+      font-size: 1.1rem;
+      color: var(--text-dim);
+      line-height: 1.9;
+      margin-bottom: 2rem;
+    }
+    
+    .about-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+    }
+    
+    .stat {
+      text-align: left;
+    }
+    
+    .stat-number {
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--gradient-1), var(--gradient-2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1;
+    }
+    
+    .stat-label {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+    
+    /* === FEATURES === */
+    .features {
+      padding: 4rem 3rem 3rem;
+      background: var(--surface);
+    }
+    
+    .features-header {
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto 2rem;
+    }
+    
+    .features-title {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 800;
+      margin-bottom: 1rem;
+    }
+    
+    .features-subtitle {
+      color: var(--text-dim);
+      font-size: 1.1rem;
+    }
+    
+    /* Features Video */
+    .features-video {
+      max-width: 1100px;
+      margin: 0 auto 2rem;
+      padding: 0 2rem;
+    }
+    
+    .video-container {
+      position: relative;
+      width: 100%;
+      padding-bottom: 56.25%;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 
+        0 25px 80px rgba(255, 107, 107, 0.25),
+        0 0 0 1px rgba(255,255,255,0.1),
+        inset 0 0 0 1px rgba(255,255,255,0.05);
+      border: 2px solid rgba(255, 107, 107, 0.3);
+      background: linear-gradient(135deg, rgba(255,107,107,0.1), rgba(255,170,0,0.1));
+    }
+    
+    .video-container iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 20px;
+    }
+    
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+    
+    .feature-card {
+      background: var(--bg);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 24px;
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.5s ease;
+      background: linear-gradient(135deg, rgba(255,107,107,0.08), rgba(255,170,0,0.03));
+      border: 1px solid rgba(255,107,107,0.15);
+      opacity: 1 !important;
+    }
+    
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--gradient-1), var(--gradient-2), var(--gradient-3));
+      transform: scaleX(0);
+      transition: transform 0.5s ease;
+    }
+    
+    .feature-card:hover {
+      transform: translateY(-10px);
+      border-color: rgba(255,107,107,0.4);
+      box-shadow: 0 30px 60px rgba(255,107,107,0.15);
+      background: linear-gradient(135deg, rgba(255,107,107,0.12), rgba(255,170,0,0.06));
+    }
+    
+    .feature-card:hover::before {
+      transform: scaleX(1);
+    }
+    
+    .feature-icon {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, rgba(255,107,107,0.1), rgba(255,107,107,0.05));
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .feature-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+    }
+    
+    .feature-desc {
+      color: var(--text-dim);
+      line-height: 1.7;
+      font-size: 0.95rem;
+    }
+    
+    .feature-stats {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    .feature-stat {
+      text-align: left;
+    }
+    
+    .feature-stat-num {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--gradient-1);
+    }
+    
+    .feature-stat-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    /* === UPCOMING EVENTS === */
+    .upcoming {
+      padding: 4rem 3rem;
+      background: var(--bg);
+    }
+    
+    .upcoming-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      max-width: 1200px;
+      margin: 0 auto 3rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    .upcoming-title {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 800;
+    }
+    
+    .upcoming-view-all {
+      color: var(--gradient-1);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: gap 0.3s ease;
+    }
+    
+    .upcoming-view-all:hover {
+      gap: 0.75rem;
+    }
+    
+    .events-list {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .event-item {
+      display: grid;
+      grid-template-columns: 100px 1fr auto;
+      gap: 2rem;
+      align-items: center;
+      padding: 1.5rem 2rem;
+      background: linear-gradient(135deg, rgba(255,107,107,0.05), rgba(255,170,0,0.03));
+      border: 1px solid rgba(255,107,107,0.2);
+      border-radius: 16px;
+      transition: all 0.3s ease;
+      opacity: 1 !important;
+    }
+    
+    .event-item:hover {
+      border-color: rgba(255,107,107,0.4);
+      transform: translateX(8px);
+      background: linear-gradient(135deg, rgba(255,107,107,0.1), rgba(255,170,0,0.05));
+      box-shadow: 0 10px 40px rgba(255,107,107,0.15);
+    }
+    
+    .event-item-date {
+      text-align: center;
+    }
+    
+    .event-item-day {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: var(--text);
+      line-height: 1;
+    }
+    
+    .event-item-month {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    
+    .event-item-info h3 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    
+    .event-item-meta {
+      display: flex;
+      gap: 1.5rem;
+      font-size: 0.85rem;
+      color: var(--text-dim);
+    }
+    
+    .event-item-meta span {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    
+    .event-item-tag {
+      padding: 0.5rem 1rem;
+      background: rgba(255,107,107,0.1);
+      border: 1px solid rgba(255,107,107,0.2);
+      border-radius: 100px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--gradient-1);
+    }
+    
+    /* === SERVICES === */
+    .services {
+      padding: 8rem 3rem;
+      background: var(--bg);
+    }
+    
+    .services-header {
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto 4rem;
+    }
+    
+    .services-title {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 800;
+      margin-bottom: 1rem;
+    }
+    
+    .services-subtitle {
+      color: var(--text-dim);
+      font-size: 1.1rem;
+      line-height: 1.8;
+    }
+    
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+    
+    .service-card {
+      padding: 2.5rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 107, 107, 0.2);
+      border-radius: 20px;
+      position: relative;
+      transition: all 0.4s ease;
+      backdrop-filter: blur(10px);
+      opacity: 1 !important;
+    }
+    
+    .service-card:hover {
+      transform: translateY(-8px);
+      border-color: var(--gradient-1);
+      box-shadow: 0 20px 50px rgba(255,107,107,0.2);
+      background: rgba(255, 107, 107, 0.08);
+    }
+    
+    .service-number {
+      font-size: 4rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, rgba(255,107,107,0.2), rgba(254,202,87,0.1));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      position: absolute;
+      top: 1rem;
+      right: 1.5rem;
+      line-height: 1;
+    }
+    
+    .service-icon {
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, rgba(255,107,107,0.2), rgba(254,202,87,0.1));
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .service-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: var(--text);
+    }
+    
+    .service-desc {
+      color: var(--text-dim);
+      font-size: 0.95rem;
+      line-height: 1.7;
+      margin-bottom: 1.5rem;
+    }
+    
+    .service-features {
+      list-style: none;
+    }
+    
+    .service-features li {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      padding: 0.5rem 0;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    .service-features li:last-child {
+      border-bottom: none;
+    }
+    
+    .service-features li::before {
+      content: '✓';
+      color: var(--gradient-1);
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+    
+    @media (max-width: 1100px) {
+      .services-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    
+    @media (max-width: 700px) {
+      .services-grid { grid-template-columns: 1fr; }
+    }
+    
+    /* === EVENT GALLERY === */
+    .gallery {
+      padding: 8rem 3rem;
+      background: var(--bg);
+      overflow: hidden;
+    }
+    
+    .gallery-header {
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto 4rem;
+    }
+    
+    .gallery-title {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 800;
+      margin-bottom: 1rem;
+    }
+    
+    .gallery-subtitle {
+      color: var(--text-dim);
+      font-size: 1.1rem;
+    }
+    
+    /* Highlights Stats */
+    .highlights-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      max-width: 1200px;
+      margin: 0 auto 4rem;
+      padding: 0 1rem;
+    }
+    
+    .highlight-stat-card {
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      aspect-ratio: 1;
+      cursor: pointer;
+      transition: transform 0.4s ease;
+    }
+    
+    .highlight-stat-card:hover {
+      transform: scale(1.05);
+    }
+    
+    .highlight-stat-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+    
+    .highlight-stat-card:hover img {
+      transform: scale(1.1);
+    }
+    
+    .highlight-stat-content {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 30%, rgba(0,0,0,0.9) 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      padding: 1.5rem;
+      text-align: center;
+    }
+    
+    .highlight-number {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--gradient-1), var(--gradient-2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1;
+    }
+    
+    .highlight-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      color: var(--text-dim);
+      margin-top: 0.5rem;
+    }
+    
+    @media (max-width: 900px) {
+      .highlights-stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    @media (max-width: 500px) {
+      .highlights-stats {
+        grid-template-columns: 1fr;
+      }
+    }
+    
+    .gallery-grid {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(2, 250px);
+      gap: 1rem;
+    }
+    
+    .gallery-item {
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      cursor: pointer;
+    }
+    
+    .gallery-item:nth-child(1) {
+      grid-column: span 2;
+      grid-row: span 2;
+    }
+    
+    .gallery-item:nth-child(4) {
+      grid-column: span 2;
+    }
+    
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease, filter 0.3s ease;
+    }
+    
+    .gallery-item:hover img {
+      transform: scale(1.1);
+    }
+    
+    .gallery-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.9) 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 1.5rem;
+    }
+    
+    .gallery-item:hover .gallery-overlay {
+      opacity: 1;
+    }
+    
+    .gallery-overlay h4 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+    
+    .gallery-overlay span {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+    }
+    
+    .gallery-count {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(10px);
+      padding: 0.4rem 0.8rem;
+      border-radius: 100px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    
+    .gallery-live {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      background: var(--gradient-1);
+      padding: 0.4rem 0.8rem;
+      border-radius: 100px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    /* Video Play Button */
+    .gallery-video-item {
+      position: relative;
+    }
+    
+    .video-play-btn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+      transition: transform 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .video-play-btn:hover {
+      transform: translate(-50%, -50%) scale(1.15);
+    }
+    
+    .video-play-btn svg circle {
+      transition: fill 0.3s ease;
+    }
+    
+    .video-play-btn:hover svg circle {
+      fill: var(--gradient-1);
+    }
+    
+    .video-play-btn:hover svg path {
+      fill: #fff;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    
+    @media (max-width: 900px) {
+      .gallery-grid {
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: auto;
+      }
+      .gallery-item:nth-child(1) {
+        grid-column: span 2;
+        grid-row: span 1;
+      }
+      .gallery-item:nth-child(4) {
+        grid-column: span 1;
+      }
+    }
+    
+    @media (max-width: 600px) {
+      .gallery-grid {
+        grid-template-columns: 1fr;
+      }
+      .gallery-item:nth-child(1),
+      .gallery-item:nth-child(4) {
+        grid-column: span 1;
+      }
+    }
+    
+    /* === TEAM SLIDER === */
+    .team {
+      padding: 6rem 0;
+      background: var(--bg);
+      overflow: hidden;
+    }
+    
+    .team-label {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    
+    .team-label h2 {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gradient-1);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .team-label h2::before,
+    .team-label h2::after {
+      content: '';
+      width: 30px;
+      height: 1px;
+      background: var(--gradient-1);
+    }
+    
+    .team-slider {
+      display: flex;
+      gap: 2rem;
+      animation: slideTeam 30s linear infinite;
+      width: max-content;
+      padding: 0 2rem;
+    }
+    
+    .team-slider:hover {
+      animation-play-state: paused;
+    }
+    
+    @keyframes slideTeam {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    
+    .team-member {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.2rem;
+      padding: 1.5rem;
+      background: var(--surface);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 20px;
+      transition: all 0.3s ease;
+      width: 220px;
+    }
+    
+    .team-member:hover {
+      transform: translateY(-5px);
+      border-color: rgba(255,255,255,0.1);
+    }
+    
+    .team-photo {
+      width: 180px;
+      height: 220px;
+      border-radius: 16px;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .team-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(100%);
+      transition: filter 0.4s ease;
+    }
+    
+    .team-member:hover .team-photo img {
+      filter: grayscale(0%);
+    }
+    
+    .team-info {
+      text-align: center;
+    }
+    
+    .team-name {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.2rem;
+    }
+    
+    .team-role {
+      font-size: 0.8rem;
+      color: var(--gradient-1);
+      font-weight: 500;
+      letter-spacing: 0.05em;
+    }
+    
+    /* === PARTNERS === */
+    .partners {
+      padding: 6rem 3rem;
+      background: var(--bg);
+    }
+    
+    .partners-header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+    
+    .partners-title {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 800;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, var(--text), var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .partners-subtitle {
+      color: var(--text-dim);
+      font-size: 1.1rem;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    
+    .partners-carousel {
+      overflow: hidden;
+      margin-bottom: 5rem;
+      padding: 2rem 0;
+    }
+    
+    .partners-track {
+      display: flex;
+      gap: 2rem;
+      animation: scrollPartners 30s linear infinite;
+      width: max-content;
+    }
+    
+    .partners-track:hover {
+      animation-play-state: paused;
+    }
+    
+    @keyframes scrollPartners {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    
+    .partner-logo {
+      flex-shrink: 0;
+      width: 160px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, rgba(255,107,107,0.08), rgba(255,170,0,0.05));
+      border: 1px solid rgba(255,107,107,0.2);
+      border-radius: 16px;
+      padding: 1.25rem;
+      filter: grayscale(50%) brightness(0.9);
+      transition: all 0.4s ease;
+    }
+    
+    .partner-logo:hover {
+      filter: grayscale(0%) brightness(1.1);
+      transform: scale(1.08) translateY(-5px);
+      border-color: rgba(255,107,107,0.5);
+      box-shadow: 0 15px 40px rgba(255,107,107,0.2);
+      background: linear-gradient(135deg, rgba(255,107,107,0.15), rgba(255,170,0,0.1));
+    }
+    
+    .partner-logo img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    
+    .sponsors-section {
+      text-align: center;
+      padding: 3rem;
+      background: linear-gradient(135deg, rgba(255,107,107,0.05), rgba(138,43,226,0.03));
+      border-radius: 30px;
+      border: 1px solid rgba(255,107,107,0.15);
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    
+    .sponsors-title {
+      font-size: 1.8rem;
+      font-weight: 800;
+      margin-bottom: 0.75rem;
+      background: linear-gradient(135deg, var(--gradient-1), var(--gradient-2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .sponsors-subtitle {
+      color: var(--text-dim);
+      font-size: 1rem;
+      margin-bottom: 2.5rem;
+    }
+    
+    .sponsors-grid {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+    
+    .sponsor-logo {
+      width: 180px;
+      height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 1.5rem;
+      filter: grayscale(30%) brightness(0.9);
+      transition: all 0.4s ease;
+    }
+    
+    .sponsor-logo:hover {
+      filter: grayscale(0%) brightness(1.1);
+      transform: scale(1.05);
+      border-color: var(--gradient-2);
+      box-shadow: 0 10px 30px rgba(255,170,0,0.2);
+      background: rgba(255,170,0,0.08);
+    }
+    
+    .sponsor-logo img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    /* === EVENT === */
+    .event {
+      padding: 8rem 3rem;
+      position: relative;
+      overflow: hidden;
+      background: var(--surface);
+    }
+    
+    .event-content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .event-badge {
+      display: inline-block;
+      padding: 0.75rem 2rem;
+      background: linear-gradient(135deg, var(--gradient-1), var(--gradient-2));
+      border-radius: 100px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--bg);
+      margin-bottom: 3rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    
+    .event-date-display {
+      margin-bottom: 2rem;
+    }
+    
+    .event-month {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+    
+    .event-range {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+    }
+    
+    .event-num {
+      font-size: clamp(4rem, 12vw, 8rem);
+      font-weight: 900;
+      color: var(--text);
+      line-height: 1;
+    }
+    
+    .event-to {
+      font-size: 1.5rem;
+      color: var(--text-muted);
+      font-weight: 300;
+    }
+    
+    .event-year {
+      font-size: 2.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--gradient-1), var(--gradient-2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 2rem;
+    }
+    
+    .event-location {
+      font-size: 1.1rem;
+      color: var(--text-dim);
+      margin-bottom: 3rem;
+    }
+    
+    .event-location strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+    
+    .event-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 1rem 2rem;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 100px;
+      color: var(--text);
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: none;
+      transition: all 0.3s ease;
+    }
+    
+    .event-cta:hover {
+      background: rgba(255,255,255,0.1);
+      border-color: var(--gradient-1);
+      transform: translateY(-2px);
+    }
+    
+    /* === CTA === */
+    .cta {
+      padding: 10rem 3rem;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .cta-bg {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--gradient-1), var(--gradient-4), var(--gradient-3));
+      opacity: 0.1;
+    }
+    
+    .cta-content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .cta-title {
+      font-size: clamp(2.5rem, 8vw, 5rem);
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+      letter-spacing: -0.03em;
+    }
+    
+    .cta-title .gradient {
+      background: linear-gradient(135deg, var(--gradient-1), var(--gradient-2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .cta-text {
+      font-size: 1.2rem;
+      color: var(--text-dim);
+      margin-bottom: 3rem;
+      line-height: 1.8;
+    }
+    
+    .cta-btn {
+      padding: 1.25rem 3rem;
+      font-size: 1.1rem;
+    }
+    
+    /* === FAQ === */
+    .faq {
+      padding: 6rem 3rem;
+      background: var(--bg);
+    }
+    
+    .faq-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .faq-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    
+    .faq-title {
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      font-weight: 800;
+    }
+    
+    .faq-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .faq-item {
+      background: var(--surface);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 16px;
+      overflow: hidden;
+      transition: border-color 0.3s ease;
+    }
+    
+    .faq-item:hover {
+      border-color: rgba(255,255,255,0.1);
+    }
+    
+    .faq-item.active {
+      border-color: var(--gradient-1);
+    }
+    
+    .faq-question {
+      width: 100%;
+      padding: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+    
+    .faq-question:hover {
+      color: var(--gradient-1);
+    }
+    
+    .faq-icon {
+      flex-shrink: 0;
+      transition: transform 0.3s ease;
+    }
+    
+    .faq-item.active .faq-icon {
+      transform: rotate(180deg);
+    }
+    
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease, padding 0.4s ease;
+    }
+    
+    .faq-item.active .faq-answer {
+      max-height: 200px;
+      padding: 0 1.5rem 1.5rem;
+    }
+    
+    .faq-answer p {
+      color: var(--text-dim);
+      line-height: 1.7;
+      font-size: 0.95rem;
+    }
+    
+    /* === APPLY SECTION === */
+    .apply-section {
+      padding: 6rem 3rem;
+      background: var(--surface);
+    }
+    
+    .apply-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    
+    .apply-title {
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      font-weight: 800;
+    }
+    
+    .apply-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .apply-card {
+      background: var(--bg);
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: transform 0.4s ease, border-color 0.3s ease;
+    }
+    
+    .apply-card:hover {
+      transform: translateY(-10px);
+      border-color: var(--gradient-1);
+    }
+    
+    .apply-card-img {
+      height: 200px;
+      overflow: hidden;
+    }
+    
+    .apply-card-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+    
+    .apply-card:hover .apply-card-img img {
+      transform: scale(1.1);
+    }
+    
+    .apply-card-content {
+      padding: 1.5rem;
+      text-align: center;
+    }
+    
+    .apply-card-content h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+    }
+    
+    .apply-card-content p {
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+      line-height: 1.6;
+    }
+    
+    @media (max-width: 900px) {
+      .apply-grid { grid-template-columns: 1fr; max-width: 400px; }
+    }
+    
+    /* === PAST SPEAKERS === */
+    .past-speakers {
+      padding: 6rem 0;
+      background: var(--bg);
+      overflow: hidden;
+    }
+    
+    .speakers-header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding: 0 3rem;
+    }
+    
+    .speakers-title {
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      font-weight: 800;
+    }
+    
+    .speakers-slider {
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+    
+    .speakers-track {
+      display: flex;
+      gap: 2rem;
+      animation: scrollSpeakers 30s linear infinite;
+      width: max-content;
+      padding: 0 2rem;
+    }
+    
+    .speakers-track:hover {
+      animation-play-state: paused;
+    }
+    
+    @keyframes scrollSpeakers {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    
+    .speaker-card {
+      flex-shrink: 0;
+      width: 250px;
+      text-align: center;
+      padding: 1.5rem;
+      background: var(--surface);
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: transform 0.3s ease, border-color 0.3s ease;
+    }
+    
+    .speaker-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(255,255,255,0.1);
+    }
+    
+    .speaker-img {
+      width: 150px;
+      height: 150px;
+      margin: 0 auto 1rem;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 3px solid rgba(255,255,255,0.1);
+    }
+    
+    .speaker-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(100%);
+      transition: filter 0.4s ease;
+    }
+    
+    .speaker-card:hover .speaker-img img {
+      filter: grayscale(0%);
+    }
+    
+    .speaker-card h4 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    
+    .speaker-card p {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+    
+    .speakers-btns {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+      padding: 0 2rem;
+    }
+
+    /* === FOOTER === */
+    .footer {
+      padding: 4rem 3rem 2rem;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      background: var(--surface);
+    }
+    
+    .footer-main {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 4rem;
+      padding-bottom: 3rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    .footer-brand {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    
+    .footer-logo {
+      font-size: 1.8rem;
+      font-weight: 800;
+    }
+    
+    .footer-logo span {
+      background: linear-gradient(135deg, var(--gradient-1), var(--gradient-2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .footer-desc {
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      line-height: 1.7;
+    }
+    
+    .footer-newsletter h4 {
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+    
+    .newsletter-form {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .newsletter-form input {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      background: var(--bg);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.9rem;
+    }
+    
+    .newsletter-form input::placeholder {
+      color: var(--text-muted);
+    }
+    
+    .newsletter-form .btn {
+      padding: 0.75rem 1.5rem;
+      font-size: 0.8rem;
+    }
+    
+    .footer-links-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+    }
+    
+    .footer-col h4 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      color: var(--text);
+    }
+    
+    .footer-col a {
+      display: block;
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 0.85rem;
+      margin-bottom: 0.75rem;
+      transition: color 0.3s ease;
+    }
+    
+    .footer-col a:hover {
+      color: var(--gradient-1);
+    }
+    
+    .footer-bottom {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding-top: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    .footer-socials {
+      display: flex;
+      gap: 1.5rem;
+    }
+    
+    .footer-socials a {
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: color 0.3s ease;
+    }
+    
+    .footer-socials a:hover {
+      color: var(--gradient-1);
+    }
+    
+    .footer-copy {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    
+    @media (max-width: 900px) {
+      .footer-main { grid-template-columns: 1fr; gap: 3rem; }
+      .footer-links-grid { grid-template-columns: repeat(2, 1fr); }
+      .footer-bottom { justify-content: center; text-align: center; }
+      .footer-socials { flex-wrap: wrap; justify-content: center; }
+    }
+    
+    /* === MOBILE === */
+    @media (max-width: 900px) {
+      .nav { padding: 1rem 1.5rem; }
+      .nav-links { display: none; }
+      .about-container { grid-template-columns: 1fr; gap: 4rem; }
+      .about-visual { max-width: 400px; margin: 0 auto; }
+      .about-content { padding: 0; text-align: center; }
+      .about-stats { justify-items: center; }
+      .hero { padding: 1.5rem; }
+      .section-label { justify-content: center; }
+      .footer-content { justify-content: center; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- SVG Filter for Gooey Effect -->
+<svg class="svg-filters" style="position:absolute;width:0;height:0;">
+  <defs>
+    <filter id="goo">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur"/>
+      <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo"/>
+      <feBlend in="SourceGraphic" in2="goo"/>
+    </filter>
+  </defs>
+</svg>
+
+<!-- Cursor -->
+<div class="cursor-blob" id="cursorBlob"></div>
+
+<!-- Loader -->
+<div class="loader" id="loader">
+  <div class="loader-logo">GWL</div>
+  <div class="loader-progress">
+    <div class="loader-bar" id="loaderBar"></div>
+  </div>
+  <div class="loader-text">Loading Experience</div>
+</div>
+
+<!-- Navigation -->
+<nav class="nav">
+  <div class="nav-logo">GWL<span>DAO</span></div>
+  <div class="nav-links">
+    <a href="#about">About</a>
+    <a href="#features">Events</a>
+    <a href="#gallery">Gallery</a>
+    <a href="#speakers">Speakers</a>
+    <a href="#faq">FAQ</a>
+  </div>
+  <button class="nav-cta">Get Pass →</button>
+  
+  <!-- Mobile Menu Toggle -->
+  <button class="mobile-menu-btn" id="mobileMenuBtn">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+</nav>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <div class="mobile-menu-links">
+    <a href="#about">About</a>
+    <a href="#features">Events</a>
+    <a href="#gallery">Gallery</a>
+    <a href="#speakers">Speakers</a>
+    <a href="#partners">Partners</a>
+    <a href="#faq">FAQ</a>
+    <button class="btn btn-primary"><span>Get Pass →</span></button>
+  </div>
+</div>
+
+<!-- Hero -->
+<section class="hero">
+  <!-- Space Background -->
+  <div class="space-bg">
+    <!-- Stars Layers -->
+    <div class="stars"></div>
+    <div class="stars2"></div>
+    <div class="stars3"></div>
+    
+    <!-- Twinkling Stars -->
+    <div class="twinkle-stars">
+      <div class="twinkle"></div>
+      <div class="twinkle"></div>
+      <div class="twinkle"></div>
+      <div class="twinkle"></div>
+      <div class="twinkle"></div>
+      <div class="twinkle"></div>
+      <div class="twinkle"></div>
+      <div class="twinkle"></div>
+      <div class="twinkle"></div>
+      <div class="twinkle"></div>
+      <div class="twinkle"></div>
+      <div class="twinkle"></div>
+      <div class="twinkle"></div>
+      <div class="twinkle"></div>
+      <div class="twinkle"></div>
+    </div>
+    
+    <!-- Nebula Effects -->
+    <div class="nebula nebula-1"></div>
+    <div class="nebula nebula-2"></div>
+    <div class="nebula nebula-3"></div>
+    <div class="nebula nebula-4"></div>
+    
+    <!-- Planets -->
+    <div class="planet planet-1"></div>
+    <div class="planet planet-2"></div>
+    <div class="planet planet-3"></div>
+    <div class="planet planet-4"></div>
+    
+    <!-- Shooting Stars -->
+    <div class="shooting-star"></div>
+    <div class="shooting-star"></div>
+    <div class="shooting-star"></div>
+    <div class="shooting-star"></div>
+    
+    <!-- Space Grid Floor -->
+    <div class="space-grid"></div>
+    
+    <!-- Floating Particles -->
+    <div class="space-particles">
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+    </div>
+  </div>
+  
+  <!-- 3D Canvas -->
+  <canvas id="hero3D"></canvas>
+
+  <div class="hero-content">
+    <div class="hero-badge">
+      <div class="hero-badge-dot"></div>
+      India Blockchain Week 2025
+    </div>
+    
+    <h1 class="hero-title">
+      <span class="hero-title-line">
+        <span class="hero-title-word">Building</span>
+      </span>
+      <span class="hero-title-line">
+        <span class="hero-title-word">The <span class="gradient">Future</span></span>
+      </span>
+      <span class="hero-title-line">
+        <span class="hero-title-word">of Web3</span>
+      </span>
+    </h1>
+    
+    <p class="hero-subtitle">
+      Gwalior's premier Web3 events community. Join 500+ builders for hackathons, meetups, workshops, and conferences shaping the decentralized future.
+    </p>
+    
+    <div class="hero-cta-group">
+      <button class="btn btn-primary"><span>Get Your Pass</span></button>
+      <button class="btn btn-outline">Learn More</button>
+    </div>
+  </div>
+  
+  <div class="hero-scroll">
+    <span class="hero-scroll-text">Scroll</span>
+    <div class="hero-scroll-line"></div>
+  </div>
+</section>
+
+<!-- Marquee -->
+<div class="marquee">
+  <div class="marquee-track">
+    <div class="marquee-item">
+      <span>✦</span> HACKATHONS <span>✦</span> MEETUPS <span>✦</span> WORKSHOPS <span>✦</span> CONFERENCES <span>✦</span> NETWORKING <span>✦</span> LEARNING <span>✦</span> BUILDING
+    </div>
+    <div class="marquee-item">
+      <span>✦</span> HACKATHONS <span>✦</span> MEETUPS <span>✦</span> WORKSHOPS <span>✦</span> CONFERENCES <span>✦</span> NETWORKING <span>✦</span> LEARNING <span>✦</span> BUILDING
+    </div>
+  </div>
+</div>
+
+<!-- About -->
+<section class="about" id="about">
+  <div class="about-container">
+    <div class="about-visual">
+      <div class="about-circle about-circle-1"></div>
+      <div class="about-circle about-circle-2"></div>
+      <div class="about-circle about-circle-3"></div>
+      <div class="about-center">DAO</div>
+      <div class="about-orbit about-orbit-1">🚀</div>
+      <div class="about-orbit about-orbit-2">⚡</div>
+      <div class="about-orbit about-orbit-3">💎</div>
+      <div class="about-orbit about-orbit-4">🔥</div>
+    </div>
+    
+    <div class="about-content">
+      <div class="section-label">About Us</div>
+      <h2 class="about-title">We're Gwalior's First Web3 Collective</h2>
+      <p class="about-text">
+        A community of builders, dreamers, and innovators shaping the decentralized future. Through hackathons, meetups, campus connects, and collaborative learning, we connect everyone who shares a vision for an open, community-driven digital future.
+      </p>
+      
+      <div class="about-stats">
+        <div class="stat">
+          <div class="stat-number">500+</div>
+          <div class="stat-label">Community Members</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">20+</div>
+          <div class="stat-label">Events Hosted</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">10+</div>
+          <div class="stat-label">College Partners</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section class="features" id="features">
+  <div class="features-header">
+    <div class="section-label">Our Events</div>
+    <h2 class="features-title">Events That Bring Builders Together</h2>
+    <p class="features-subtitle">From intimate meetups to large-scale conferences, we create spaces for learning, connecting, and building.</p>
+  </div>
+  
+  <!-- Event Video -->
+  <div class="features-video">
+    <div class="video-container">
+      <iframe 
+        src="https://www.youtube.com/embed/BvEz7VJoH64?autoplay=1&mute=1&loop=1&playlist=BvEz7VJoH64&controls=1&rel=0&modestbranding=1" 
+        title="GwaliorDAO Event Highlights"
+        frameborder="0" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+        allowfullscreen>
+      </iframe>
+    </div>
+  </div>
+  
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">🏆</div>
+      <h3 class="feature-title">Hackathons</h3>
+      <p class="feature-desc">48-hour coding marathons where teams compete to build innovative Web3 solutions. Win prizes, get mentorship, and launch your project.</p>
+      <div class="feature-stats">
+        <div class="feature-stat">
+          <div class="feature-stat-num">5+</div>
+          <div class="feature-stat-label">Per Year</div>
+        </div>
+        <div class="feature-stat">
+          <div class="feature-stat-num">₹5L+</div>
+          <div class="feature-stat-label">Prize Pool</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="feature-card">
+      <div class="feature-icon">🤝</div>
+      <h3 class="feature-title">Weekly Meetups</h3>
+      <p class="feature-desc">Casual gatherings every Saturday for builders to network, share progress, and collaborate on projects in a relaxed environment.</p>
+      <div class="feature-stats">
+        <div class="feature-stat">
+          <div class="feature-stat-num">50+</div>
+          <div class="feature-stat-label">Meetups</div>
+        </div>
+        <div class="feature-stat">
+          <div class="feature-stat-num">40</div>
+          <div class="feature-stat-label">Avg Attendance</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="feature-card">
+      <div class="feature-icon">📚</div>
+      <h3 class="feature-title">Technical Workshops</h3>
+      <p class="feature-desc">Deep-dive sessions on Solidity, Rust, DeFi protocols, NFT development, and emerging blockchain technologies.</p>
+      <div class="feature-stats">
+        <div class="feature-stat">
+          <div class="feature-stat-num">30+</div>
+          <div class="feature-stat-label">Workshops</div>
+        </div>
+        <div class="feature-stat">
+          <div class="feature-stat-num">Free</div>
+          <div class="feature-stat-label">Always</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="feature-card">
+      <div class="feature-icon">🎓</div>
+      <h3 class="feature-title">Campus Connect</h3>
+      <p class="feature-desc">On-campus Web3 bootcamps, speaker sessions, and recruitment drives connecting students with opportunities.</p>
+      <div class="feature-stats">
+        <div class="feature-stat">
+          <div class="feature-stat-num">15+</div>
+          <div class="feature-stat-label">Colleges</div>
+        </div>
+        <div class="feature-stat">
+          <div class="feature-stat-num">2000+</div>
+          <div class="feature-stat-label">Students</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Upcoming Events -->
+<section class="upcoming" id="upcoming">
+  <div class="upcoming-header">
+    <div>
+      <div class="section-label">What's Next</div>
+      <h2 class="upcoming-title">Upcoming Events</h2>
+    </div>
+    <a href="#" class="upcoming-view-all">View Calendar →</a>
+  </div>
+  
+  <div class="events-list">
+    <div class="event-item">
+      <div class="event-item-date">
+        <div class="event-item-day">15</div>
+        <div class="event-item-month">Jan</div>
+      </div>
+      <div class="event-item-info">
+        <h3>Web3 Builder Meetup #52</h3>
+        <div class="event-item-meta">
+          <span>📍 Gwalior Tech Hub</span>
+          <span>🕐 6:00 PM</span>
+          <span>👥 45 Attending</span>
+        </div>
+      </div>
+      <div class="event-item-tag">Meetup</div>
+    </div>
+    
+    <div class="event-item">
+      <div class="event-item-date">
+        <div class="event-item-day">22</div>
+        <div class="event-item-month">Jan</div>
+      </div>
+      <div class="event-item-info">
+        <h3>Solidity Masterclass: Advanced Patterns</h3>
+        <div class="event-item-meta">
+          <span>📍 ITM University</span>
+          <span>🕐 2:00 PM</span>
+          <span>👥 80 Registered</span>
+        </div>
+      </div>
+      <div class="event-item-tag">Workshop</div>
+    </div>
+    
+    <div class="event-item">
+      <div class="event-item-date">
+        <div class="event-item-day">01</div>
+        <div class="event-item-month">Feb</div>
+      </div>
+      <div class="event-item-info">
+        <h3>DeFi Gwalior Hackathon 2026</h3>
+        <div class="event-item-meta">
+          <span>📍 IIITM Gwalior</span>
+          <span>🕐 48 Hours</span>
+          <span>👥 200+ Expected</span>
+        </div>
+      </div>
+      <div class="event-item-tag">Hackathon</div>
+    </div>
+    
+    <div class="event-item">
+      <div class="event-item-date">
+        <div class="event-item-day">08</div>
+        <div class="event-item-month">Feb</div>
+      </div>
+      <div class="event-item-info">
+        <h3>NFT Art & Gaming Summit</h3>
+        <div class="event-item-meta">
+          <span>📍 Gwalior Trade Fair</span>
+          <span>🕐 10:00 AM</span>
+          <span>👥 150+ Expected</span>
+        </div>
+      </div>
+      <div class="event-item-tag">Conference</div>
+    </div>
+    
+    <div class="event-item">
+      <div class="event-item-date">
+        <div class="event-item-day">14</div>
+        <div class="event-item-month">Feb</div>
+      </div>
+      <div class="event-item-info">
+        <h3>Blockchain 101: Campus Connect</h3>
+        <div class="event-item-meta">
+          <span>📍 Amity University</span>
+          <span>🕐 11:00 AM</span>
+          <span>👥 120 Registered</span>
+        </div>
+      </div>
+      <div class="event-item-tag">Workshop</div>
+    </div>
+    
+    <div class="event-item">
+      <div class="event-item-date">
+        <div class="event-item-day">22</div>
+        <div class="event-item-month">Feb</div>
+      </div>
+      <div class="event-item-info">
+        <h3>Web3 Startup Pitch Night</h3>
+        <div class="event-item-meta">
+          <span>📍 Startup Incubator MP</span>
+          <span>🕐 5:00 PM</span>
+          <span>👥 60 Seats</span>
+        </div>
+      </div>
+      <div class="event-item-tag">Pitch</div>
+    </div>
+    
+    <div class="event-item">
+      <div class="event-item-date">
+        <div class="event-item-day">01</div>
+        <div class="event-item-month">Mar</div>
+      </div>
+      <div class="event-item-info">
+        <h3>ZK Proofs Deep Dive Workshop</h3>
+        <div class="event-item-meta">
+          <span>📍 Online + ITM Campus</span>
+          <span>🕐 3:00 PM</span>
+          <span>👥 100 Slots</span>
+        </div>
+      </div>
+      <div class="event-item-tag">Workshop</div>
+    </div>
+    
+    <div class="event-item">
+      <div class="event-item-date">
+        <div class="event-item-day">15</div>
+        <div class="event-item-month">Mar</div>
+      </div>
+      <div class="event-item-info">
+        <h3>GWLDAO Annual Conference 2026</h3>
+        <div class="event-item-meta">
+          <span>📍 Gwalior Convention Center</span>
+          <span>🕐 Full Day</span>
+          <span>👥 500+ Expected</span>
+        </div>
+      </div>
+      <div class="event-item-tag">Conference</div>
+    </div>
+  </div>
+</section>
+
+<!-- Services -->
+<section class="services" id="services">
+  <div class="services-header">
+    <div class="section-label">What We Offer</div>
+    <h2 class="services-title">Services for Web3 Builders</h2>
+    <p class="services-subtitle">Whether you're a student, startup, or enterprise — we provide the resources and connections you need to build in Web3.</p>
+  </div>
+  
+  <div class="services-grid">
+    <div class="service-card">
+      <div class="service-number">01</div>
+      <div class="service-icon">🎪</div>
+      <h3 class="service-title">Event Management</h3>
+      <p class="service-desc">End-to-end Web3 event planning from concept to execution.</p>
+      <ul class="service-features">
+        <li>Venue sourcing & setup</li>
+        <li>Speaker coordination</li>
+        <li>Sponsorship management</li>
+        <li>Community mobilization</li>
+      </ul>
+    </div>
+    
+    <div class="service-card">
+      <div class="service-number">02</div>
+      <div class="service-icon">🎯</div>
+      <h3 class="service-title">Community Building</h3>
+      <p class="service-desc">Grow and engage your Web3 community in Central India.</p>
+      <ul class="service-features">
+        <li>Ambassador programs</li>
+        <li>College partnerships</li>
+        <li>Discord/Telegram growth</li>
+        <li>IRL community events</li>
+      </ul>
+    </div>
+    
+    <div class="service-card">
+      <div class="service-number">03</div>
+      <div class="service-icon">💼</div>
+      <h3 class="service-title">Talent Connect</h3>
+      <p class="service-desc">Connect with skilled Web3 developers from our network.</p>
+      <ul class="service-features">
+        <li>Developer matching</li>
+        <li>Hiring events</li>
+        <li>Internship programs</li>
+        <li>Freelance network</li>
+      </ul>
+    </div>
+    
+    <div class="service-card">
+      <div class="service-number">04</div>
+      <div class="service-icon">🎓</div>
+      <h3 class="service-title">Web3 Education</h3>
+      <p class="service-desc">Comprehensive learning programs for blockchain enthusiasts.</p>
+      <ul class="service-features">
+        <li>Workshops & bootcamps</li>
+        <li>Online courses</li>
+        <li>Mentorship programs</li>
+        <li>Certification tracks</li>
+      </ul>
+    </div>
+    
+    <div class="service-card">
+      <div class="service-number">05</div>
+      <div class="service-icon">🚀</div>
+      <h3 class="service-title">Startup Incubation</h3>
+      <p class="service-desc">Launch and scale your Web3 startup with our support.</p>
+      <ul class="service-features">
+        <li>Pitch preparation</li>
+        <li>Investor connections</li>
+        <li>Technical guidance</li>
+        <li>Go-to-market strategy</li>
+      </ul>
+    </div>
+    
+    <div class="service-card">
+      <div class="service-number">06</div>
+      <div class="service-icon">🔗</div>
+      <h3 class="service-title">Protocol Partnerships</h3>
+      <p class="service-desc">Connect with leading blockchain protocols and ecosystems.</p>
+      <ul class="service-features">
+        <li>Grant applications</li>
+        <li>Technical integrations</li>
+        <li>Co-marketing campaigns</li>
+        <li>Ecosystem access</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Event Gallery -->
+<section class="gallery" id="gallery">
+  <div class="gallery-header">
+    <div class="section-label">Moments</div>
+    <h2 class="gallery-title">HIGHLIGHTS OF GWALIORDAO2024 CONFERENCE</h2>
+    <p class="gallery-subtitle">Captured memories from our hackathons, meetups, and conferences</p>
+  </div>
+  
+  <!-- Stats Cards -->
+  <div class="highlights-stats">
+    <div class="highlight-stat-card">
+      <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&q=80" alt="Attendees">
+      <div class="highlight-stat-content">
+        <span class="highlight-number">3,500+</span>
+        <span class="highlight-label">ATTENDEES</span>
+      </div>
+    </div>
+    <div class="highlight-stat-card">
+      <img src="https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=400&q=80" alt="Speakers">
+      <div class="highlight-stat-content">
+        <span class="highlight-number">100+</span>
+        <span class="highlight-label">SPEAKERS</span>
+      </div>
+    </div>
+    <div class="highlight-stat-card">
+      <img src="https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=400&q=80" alt="Sponsors">
+      <div class="highlight-stat-content">
+        <span class="highlight-number">40+</span>
+        <span class="highlight-label">SPONSORS</span>
+      </div>
+    </div>
+    <div class="highlight-stat-card">
+      <img src="https://images.unsplash.com/photo-1591115765373-5207764f72e7?w=400&q=80" alt="Side Events">
+      <div class="highlight-stat-content">
+        <span class="highlight-number">100+</span>
+        <span class="highlight-label">SIDE-EVENTS</span>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Photo Grid -->
+  <div class="gallery-grid">
+    <div class="gallery-item">
+      <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80" alt="Conference">
+      <div class="gallery-live">Featured</div>
+      <div class="gallery-overlay">
+        <h4>India Blockchain Week 2025</h4>
+        <span>December 2025 • 500+ Attendees</span>
+      </div>
+      <div class="gallery-count">📸 42</div>
+    </div>
+    
+    <div class="gallery-item">
+      <img src="https://images.unsplash.com/photo-1591115765373-5207764f72e7?w=600&q=80" alt="Hackathon">
+      <div class="gallery-overlay">
+        <h4>DeFi Hackathon</h4>
+        <span>October 2025</span>
+      </div>
+    </div>
+    
+    <div class="gallery-item gallery-video-item">
+      <img src="https://images.unsplash.com/photo-1528605248644-14dd04022da1?w=600&q=80" alt="Video">
+      <a href="https://youtu.be/TIgKjPw3ujs" target="_blank" class="video-play-btn">
+        <svg width="60" height="60" viewBox="0 0 60 60" fill="none">
+          <circle cx="30" cy="30" r="30" fill="rgba(255,255,255,0.9)"/>
+          <path d="M24 20L44 30L24 40V20Z" fill="#050505"/>
+        </svg>
+      </a>
+      <div class="gallery-overlay">
+        <h4>Watch Highlights</h4>
+        <span>GwaliorDAO 2024</span>
+      </div>
+    </div>
+    
+    <div class="gallery-item">
+      <img src="https://images.unsplash.com/photo-1505373877841-8d25f7d46678?w=800&q=80" alt="Workshop">
+      <div class="gallery-overlay">
+        <h4>Solidity Workshop at IIITM</h4>
+        <span>September 2025</span>
+      </div>
+    </div>
+    
+    <div class="gallery-item">
+      <img src="https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=600&q=80" alt="Panel">
+      <div class="gallery-overlay">
+        <h4>Web3 Panel Discussion</h4>
+        <span>August 2025</span>
+      </div>
+    </div>
+    
+    <div class="gallery-item">
+      <img src="https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=600&q=80" alt="Networking">
+      <div class="gallery-overlay">
+        <h4>Networking Night</h4>
+        <span>July 2025</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Team -->
+<section class="team" id="team">
+  <div class="team-label">
+    <h2>GWL DAO Core Team</h2>
+  </div>
+  
+  <div class="team-slider">
+    <!-- First set -->
+    <div class="team-member">
+      <div class="team-photo">
+        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80" alt="Nikhil Jain">
+      </div>
+      <div class="team-info">
+        <div class="team-name">Nikhil Jain</div>
+        <div class="team-role">Growth & Marketing Lead</div>
+      </div>
+    </div>
+    
+    <div class="team-member">
+      <div class="team-photo">
+        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80" alt="Satvik Shrivastava">
+      </div>
+      <div class="team-info">
+        <div class="team-name">Satvik Shrivastava</div>
+        <div class="team-role">Moderator</div>
+      </div>
+    </div>
+    
+    <div class="team-member">
+      <div class="team-photo">
+        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80" alt="Shubhi Modi">
+      </div>
+      <div class="team-info">
+        <div class="team-name">Shubhi Modi</div>
+        <div class="team-role">Techno Functional</div>
+      </div>
+    </div>
+    
+    <div class="team-member">
+      <div class="team-photo">
+        <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80" alt="Gaurav Soni">
+      </div>
+      <div class="team-info">
+        <div class="team-name">Gaurav Soni</div>
+        <div class="team-role">DAO Lead</div>
+      </div>
+    </div>
+    
+    <div class="team-member">
+      <div class="team-photo">
+        <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&q=80" alt="Diya Modi">
+      </div>
+      <div class="team-info">
+        <div class="team-name">Diya Modi</div>
+        <div class="team-role">Partnership Lead</div>
+      </div>
+    </div>
+    
+    <!-- Duplicate for infinite scroll -->
+    <div class="team-member">
+      <div class="team-photo">
+        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80" alt="Nikhil Jain">
+      </div>
+      <div class="team-info">
+        <div class="team-name">Nikhil Jain</div>
+        <div class="team-role">Growth & Marketing Lead</div>
+      </div>
+    </div>
+    
+    <div class="team-member">
+      <div class="team-photo">
+        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&q=80" alt="Satvik Shrivastava">
+      </div>
+      <div class="team-info">
+        <div class="team-name">Satvik Shrivastava</div>
+        <div class="team-role">Moderator</div>
+      </div>
+    </div>
+    
+    <div class="team-member">
+      <div class="team-photo">
+        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80" alt="Shubhi Modi">
+      </div>
+      <div class="team-info">
+        <div class="team-name">Shubhi Modi</div>
+        <div class="team-role">Techno Functional</div>
+      </div>
+    </div>
+    
+    <div class="team-member">
+      <div class="team-photo">
+        <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80" alt="Gaurav Soni">
+      </div>
+      <div class="team-info">
+        <div class="team-name">Gaurav Soni</div>
+        <div class="team-role">DAO Lead</div>
+      </div>
+    </div>
+    
+    <div class="team-member">
+      <div class="team-photo">
+        <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&q=80" alt="Diya Modi">
+      </div>
+      <div class="team-info">
+        <div class="team-name">Diya Modi</div>
+        <div class="team-role">Partnership Lead</div>
+      </div>
+    </div>
+  </div>
+  
+  <div style="text-align: center; margin-top: 3rem;">
+    <button class="btn btn-outline">Meet the Core Team</button>
+  </div>
+</section>
+
+<!-- Partners Section -->
+<section class="partners" id="partners">
+  <div class="partners-header">
+    <div class="section-label">Partners</div>
+    <h2 class="partners-title">COMMUNITY PARTNERS</h2>
+    <p class="partners-subtitle">Powered by our community of builders, clubs, and on-ground ecosystems.</p>
+  </div>
+  
+  <div class="partners-carousel">
+    <div class="partners-track">
+      <div class="partner-logo"><img src="https://gwaliordao.onrender.com/community%20partners/aurvyx.svg" alt="Aurvyx"></div>
+      <div class="partner-logo"><img src="https://gwaliordao.onrender.com/community%20partners/blockchainorbit.svg" alt="Blockchain Orbit"></div>
+      <div class="partner-logo"><img src="https://gwaliordao.onrender.com/community%20partners/codenex.svg" alt="CodeNex"></div>
+      <div class="partner-logo"><img src="https://gwaliordao.onrender.com/community%20partners/gdggwalior.svg" alt="GDG Gwalior"></div>
+      <div class="partner-logo"><img src="https://gwaliordao.onrender.com/community%20partners/gig3.svg" alt="GIG3"></div>
+      <div class="partner-logo"><img src="https://gwaliordao.onrender.com/community%20partners/gwaliorglory.svg" alt="Gwalior Glory"></div>
+      <div class="partner-logo"><img src="https://gwaliordao.onrender.com/community%20partners/mewardao.svg" alt="Mewar DAO"></div>
+      <div class="partner-logo"><img src="https://gwaliordao.onrender.com/community%20partners/socials.svg" alt="Socials"></div>
+      <div class="partner-logo"><img src="https://gwaliordao.onrender.com/community%20partners/swoc.svg" alt="SWOC"></div>
+      <div class="partner-logo"><img src="https://gwaliordao.onrender.com/community%20partners/unseengwalior.svg" alt="Unseen Gwalior"></div>
+      <!-- Duplicate for infinite scroll -->
+      <div class="partner-logo"><img src="https://gwaliordao.onrender.com/community%20partners/aurvyx.svg" alt="Aurvyx"></div>
+      <div class="partner-logo"><img src="https://gwaliordao.onrender.com/community%20partners/blockchainorbit.svg" alt="Blockchain Orbit"></div>
+      <div class="partner-logo"><img src="https://gwaliordao.onrender.com/community%20partners/codenex.svg" alt="CodeNex"></div>
+      <div class="partner-logo"><img src="https://gwaliordao.onrender.com/community%20partners/gdggwalior.svg" alt="GDG Gwalior"></div>
+      <div class="partner-logo"><img src="https://gwaliordao.onrender.com/community%20partners/gig3.svg" alt="GIG3"></div>
+      <div class="partner-logo"><img src="https://gwaliordao.onrender.com/community%20partners/gwaliorglory.svg" alt="Gwalior Glory"></div>
+      <div class="partner-logo"><img src="https://gwaliordao.onrender.com/community%20partners/mewardao.svg" alt="Mewar DAO"></div>
+      <div class="partner-logo"><img src="https://gwaliordao.onrender.com/community%20partners/socials.svg" alt="Socials"></div>
+      <div class="partner-logo"><img src="https://gwaliordao.onrender.com/community%20partners/swoc.svg" alt="SWOC"></div>
+      <div class="partner-logo"><img src="https://gwaliordao.onrender.com/community%20partners/unseengwalior.svg" alt="Unseen Gwalior"></div>
+    </div>
+  </div>
+  
+  <div class="sponsors-section">
+    <h3 class="sponsors-title">SPONSORS</h3>
+    <p class="sponsors-subtitle">Backed by our ecosystem partners and protocol sponsors.</p>
+    <div class="sponsors-grid">
+      <div class="sponsor-logo"><img src="https://gwaliordao.onrender.com/sponsors/avalanche.svg" alt="Avalanche"></div>
+      <div class="sponsor-logo"><img src="https://gwaliordao.onrender.com/sponsors/endlessdomains.svg" alt="Endless Domains"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Past Speakers Section -->
+<section class="past-speakers" id="speakers">
+  <div class="speakers-header">
+    <div class="section-label">Speakers</div>
+    <h2 class="speakers-title">PAST SPEAKERS</h2>
+  </div>
+  
+  <div class="speakers-slider">
+    <div class="speakers-track">
+      <div class="speaker-card">
+        <div class="speaker-img">
+          <img src="https://gwaliordao.onrender.com/past%20speakers/Amit%20Sharma.jpeg" alt="Amit Sharma">
+        </div>
+        <h4>Amit Sharma</h4>
+        <p>Blockchain & Web3 Community Builder | Cyber Security</p>
+      </div>
+      
+      <div class="speaker-card">
+        <div class="speaker-img">
+          <img src="https://gwaliordao.onrender.com/past%20speakers/Nancy%20Garg.jpeg" alt="Nancy Garg">
+        </div>
+        <h4>Nancy Garg</h4>
+        <p>Business Development (Web3) | Partnerships & Ecosystem Growth</p>
+      </div>
+      
+      <div class="speaker-card">
+        <div class="speaker-img">
+          <img src="https://gwaliordao.onrender.com/past%20speakers/Anadi%20Kapoor.jpeg" alt="Anadi Kapoor">
+        </div>
+        <h4>Anadi Kapoor</h4>
+        <p>Web3 Growth Engineer | Community & Business Development</p>
+      </div>
+      
+      <div class="speaker-card">
+        <div class="speaker-img">
+          <img src="https://gwaliordao.onrender.com/past%20speakers/Jay%20Saadana.jpeg" alt="Jay Saadana">
+        </div>
+        <h4>Jay Saadana</h4>
+        <p>DevRel & OSS Evangelist | Dev Tools GTM</p>
+      </div>
+      
+      <div class="speaker-card">
+        <div class="speaker-img">
+          <img src="https://gwaliordao.onrender.com/past%20speakers/Umesh%20Kataria.png" alt="Umesh Kataria">
+        </div>
+        <h4>Umesh Kataria</h4>
+        <p>Building Tech with Soul | Web3, AI & Creative Systems</p>
+      </div>
+      
+      <!-- Duplicate for scroll -->
+      <div class="speaker-card">
+        <div class="speaker-img">
+          <img src="https://gwaliordao.onrender.com/past%20speakers/Amit%20Sharma.jpeg" alt="Amit Sharma">
+        </div>
+        <h4>Amit Sharma</h4>
+        <p>Blockchain & Web3 Community Builder | Cyber Security</p>
+      </div>
+      
+      <div class="speaker-card">
+        <div class="speaker-img">
+          <img src="https://gwaliordao.onrender.com/past%20speakers/Nancy%20Garg.jpeg" alt="Nancy Garg">
+        </div>
+        <h4>Nancy Garg</h4>
+        <p>Business Development (Web3) | Partnerships & Ecosystem Growth</p>
+      </div>
+    </div>
+  </div>
+  
+  <div class="speakers-btns">
+    <a href="#" class="btn btn-outline">GWALIORDAO2023 SPEAKERS →</a>
+    <a href="#" class="btn btn-outline">GWALIORDAO2024 SPEAKERS →</a>
+  </div>
+</section>
+
+<!-- Event -->
+<section class="event" id="event">
+  <div class="event-content">
+    <div class="event-badge">🎉 India Blockchain Week × GWL DAO</div>
+    
+    <div class="event-date-display">
+      <div class="event-month">December</div>
+      <div class="event-range">
+        <span class="event-num">1</span>
+        <span class="event-to">—</span>
+        <span class="event-num">7</span>
+      </div>
+    </div>
+    
+    <div class="event-year">2025</div>
+    
+    <div class="event-location">
+      <strong>Gwalior</strong>, Madhya Pradesh, India
+    </div>
+    
+    <button class="event-cta">Reserve Your Spot →</button>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta" id="cta">
+  <div class="cta-bg"></div>
+  <div class="cta-content">
+    <h2 class="cta-title">Ready to <span class="gradient">Join</span> the Revolution?</h2>
+    <p class="cta-text">Be part of something bigger. Connect with builders, learn new skills, and shape the future of Web3 in Central India.</p>
+    <button class="btn btn-primary cta-btn"><span>Get Your Pass Now →</span></button>
+  </div>
+</section>
+
+<!-- FAQ Section -->
+<section class="faq" id="faq">
+  <div class="faq-container">
+    <div class="faq-header">
+      <div class="section-label">Support</div>
+      <h2 class="faq-title">FREQUENTLY ASKED QUESTIONS</h2>
+    </div>
+    
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-question">
+          <span>WHAT IS GWALIOR DAO?</span>
+          <svg class="faq-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 9l6 6 6-6"/>
+          </svg>
+        </button>
+        <div class="faq-answer">
+          <p>Gwalior DAO is a community driven, decentralized initiative focused on building a Web3, blockchain, and innovation ecosystem in the Gwalior region.</p>
+        </div>
+      </div>
+      
+      <div class="faq-item">
+        <button class="faq-question">
+          <span>WHAT DOES A DAO MEAN IN THE CONTEXT OF GWALIOR DAO?</span>
+          <svg class="faq-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 9l6 6 6-6"/>
+          </svg>
+        </button>
+        <div class="faq-answer">
+          <p>DAO stands for Decentralized Autonomous Organization. In our context, it represents a community-led initiative where decisions are made collectively by members.</p>
+        </div>
+      </div>
+      
+      <div class="faq-item">
+        <button class="faq-question">
+          <span>WHO CAN JOIN GWALIOR DAO?</span>
+          <svg class="faq-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 9l6 6 6-6"/>
+          </svg>
+        </button>
+        <div class="faq-answer">
+          <p>Anyone interested in Web3, blockchain, and innovation can join! Whether you're a student, developer, entrepreneur, or simply curious about the space.</p>
+        </div>
+      </div>
+      
+      <div class="faq-item">
+        <button class="faq-question">
+          <span>WHAT ACTIVITIES DOES GWALIOR DAO ORGANIZE?</span>
+          <svg class="faq-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 9l6 6 6-6"/>
+          </svg>
+        </button>
+        <div class="faq-answer">
+          <p>We organize hackathons, meetups, workshops, campus connects, conferences, and collaborative learning sessions focused on Web3 and emerging technologies.</p>
+        </div>
+      </div>
+      
+      <div class="faq-item">
+        <button class="faq-question">
+          <span>WHAT IS THE LONG TERM VISION OF GWALIOR DAO?</span>
+          <svg class="faq-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 9l6 6 6-6"/>
+          </svg>
+        </button>
+        <div class="faq-answer">
+          <p>Our vision is to establish Gwalior as a prominent hub for Web3 innovation in Central India, fostering talent, creating opportunities, and building a sustainable blockchain ecosystem.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Apply For Section -->
+<section class="apply-section" id="apply">
+  <div class="apply-header">
+    <div class="section-label">Get Involved</div>
+    <h2 class="apply-title">APPLY FOR GWALIORDAO2025</h2>
+  </div>
+  
+  <div class="apply-grid">
+    <div class="apply-card">
+      <div class="apply-card-img">
+        <img src="https://images.unsplash.com/photo-1475721027785-f74eccf877e2?w=600&q=80" alt="Become a Speaker">
+      </div>
+      <div class="apply-card-content">
+        <h3>BECOME A SPEAKER</h3>
+        <p>Want to be a speaker? Click the button below to fill out the form.</p>
+        <a href="#" class="btn btn-primary"><span>Apply Now</span></a>
+      </div>
+    </div>
+    
+    <div class="apply-card">
+      <div class="apply-card-img">
+        <img src="https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=600&q=80" alt="Become a Sponsor">
+      </div>
+      <div class="apply-card-content">
+        <h3>BECOME A SPONSOR</h3>
+        <p>Considering sponsoring GwaliorDAO2025? Click below to fill out the form and receive the prospectus.</p>
+        <a href="#" class="btn btn-primary"><span>Apply Now</span></a>
+      </div>
+    </div>
+    
+    <div class="apply-card">
+      <div class="apply-card-img">
+        <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&q=80" alt="Become a Partner">
+      </div>
+      <div class="apply-card-content">
+        <h3>BECOME A PARTNER</h3>
+        <p>Interested in becoming a partner? Click below to apply.</p>
+        <a href="#" class="btn btn-primary"><span>Apply Now</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-main">
+    <div class="footer-brand">
+      <div class="footer-logo">GWL<span>DAO</span></div>
+      <p class="footer-desc">Gwalior DAO is a regional Web3 & tech community shaping the next wave of decentralization in Gwalior.</p>
+      
+      <div class="footer-newsletter">
+        <h4>GET UPDATES</h4>
+        <div class="newsletter-form">
+          <input type="email" placeholder="Enter your email">
+          <button class="btn btn-primary"><span>REGISTER</span></button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="footer-links-grid">
+      <div class="footer-col">
+        <h4>Quick Links</h4>
+        <a href="#">Speak at GwaliorDAO2025</a>
+        <a href="#">Sponsor the Conference</a>
+        <a href="#">Partner with Us</a>
+        <a href="#">Side Events</a>
+      </div>
+      <div class="footer-col">
+        <h4>Past Events</h4>
+        <a href="#">GwaliorDAO2024</a>
+        <a href="#">GwaliorDAO2023</a>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms & Conditions</a>
+      </div>
+    </div>
+  </div>
+  
+  <div class="footer-bottom">
+    <div class="footer-socials">
+      <a href="https://linkedin.com/company/gwaliordao/" target="_blank">LinkedIn</a>
+      <a href="https://x.com/TheGwaliorDAO" target="_blank">Twitter</a>
+      <a href="https://www.instagram.com/gwaliordao_" target="_blank">Instagram</a>
+      <a href="https://discord.gg/GZGH7DxYbr" target="_blank">Discord</a>
+      <a href="https://github.com/GwaliorDAO" target="_blank">GitHub</a>
+      <a href="https://t.me/gwaliordao" target="_blank">Telegram</a>
+    </div>
+    <div class="footer-copy">© GWALIORDAO 2026 ALL RIGHTS RESERVED</div>
+  </div>
+</footer>
+
+<script>
+// Register GSAP ScrollTrigger
+gsap.registerPlugin(ScrollTrigger);
+
+// === THREE.JS 3D HOLOGRAM SCENE ===
+const canvas = document.getElementById('hero3D');
+if (canvas) {
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setClearColor(0x000000, 0); // Transparent background
+
+  const colors = [0xff6b6b, 0xfeca57, 0x48dbfb, 0xff9ff3, 0x54a0ff];
+
+  // === 3D HOLOGRAM - Rotating wireframe sphere ===
+  const hologramGroup = new THREE.Group();
+  scene.add(hologramGroup);
+
+  // Main hologram sphere (wireframe)
+  const sphereGeo = new THREE.IcosahedronGeometry(2, 2);
+  const sphereMat = new THREE.MeshBasicMaterial({ 
+    color: 0x48dbfb, 
+    wireframe: true,
+    transparent: true,
+    opacity: 0.6
+  });
+  const hologramSphere = new THREE.Mesh(sphereGeo, sphereMat);
+  hologramGroup.add(hologramSphere);
+
+  // Inner sphere
+  const innerSphereGeo = new THREE.IcosahedronGeometry(1.5, 1);
+  const innerSphereMat = new THREE.MeshBasicMaterial({ 
+    color: 0xff6b6b, 
+    wireframe: true,
+    transparent: true,
+    opacity: 0.4
+  });
+  const innerSphere = new THREE.Mesh(innerSphereGeo, innerSphereMat);
+  hologramGroup.add(innerSphere);
+
+  // Core glow
+  const coreGeo = new THREE.SphereGeometry(0.5, 32, 32);
+  const coreMat = new THREE.MeshBasicMaterial({ 
+    color: 0xfeca57, 
+    transparent: true,
+    opacity: 0.8
+  });
+  const core = new THREE.Mesh(coreGeo, coreMat);
+  hologramGroup.add(core);
+
+  // Orbital rings
+  const ring1 = new THREE.Mesh(
+    new THREE.TorusGeometry(2.5, 0.02, 16, 100),
+    new THREE.MeshBasicMaterial({ color: 0xff6b6b, transparent: true, opacity: 0.5 })
+  );
+  ring1.rotation.x = Math.PI / 2;
+  hologramGroup.add(ring1);
+
+  const ring2 = new THREE.Mesh(
+    new THREE.TorusGeometry(2.8, 0.02, 16, 100),
+    new THREE.MeshBasicMaterial({ color: 0xfeca57, transparent: true, opacity: 0.4 })
+  );
+  ring2.rotation.x = Math.PI / 3;
+  ring2.rotation.y = Math.PI / 4;
+  hologramGroup.add(ring2);
+
+  const ring3 = new THREE.Mesh(
+    new THREE.TorusGeometry(3.1, 0.02, 16, 100),
+    new THREE.MeshBasicMaterial({ color: 0x48dbfb, transparent: true, opacity: 0.3 })
+  );
+  ring3.rotation.x = Math.PI / 6;
+  ring3.rotation.z = Math.PI / 3;
+  hologramGroup.add(ring3);
+
+  // Floating particles around hologram
+  const particleCount = 200;
+  const particleGeo = new THREE.BufferGeometry();
+  const particlePositions = new Float32Array(particleCount * 3);
+  const particleColors = new Float32Array(particleCount * 3);
+  
+  for (let i = 0; i < particleCount; i++) {
+    const theta = Math.random() * Math.PI * 2;
+    const phi = Math.random() * Math.PI;
+    const r = 3 + Math.random() * 2;
+    
+    particlePositions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+    particlePositions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+    particlePositions[i * 3 + 2] = r * Math.cos(phi);
+    
+    const c = colors[Math.floor(Math.random() * 5)];
+    particleColors[i * 3] = ((c >> 16) & 255) / 255;
+    particleColors[i * 3 + 1] = ((c >> 8) & 255) / 255;
+    particleColors[i * 3 + 2] = (c & 255) / 255;
+  }
+  
+  particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+  particleGeo.setAttribute('color', new THREE.BufferAttribute(particleColors, 3));
+  
+  const particles = new THREE.Points(particleGeo, new THREE.PointsMaterial({
+    size: 0.05,
+    vertexColors: true,
+    transparent: true,
+    opacity: 0.8,
+    blending: THREE.AdditiveBlending
+  }));
+  hologramGroup.add(particles);
+
+  // Background stars
+  const starGeo = new THREE.BufferGeometry();
+  const starPos = new Float32Array(300 * 3);
+  for (let i = 0; i < 300 * 3; i++) starPos[i] = (Math.random() - 0.5) * 50;
+  starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+  const stars = new THREE.Points(starGeo, new THREE.PointsMaterial({ 
+    size: 0.02, 
+    color: 0xffffff, 
+    transparent: true, 
+    opacity: 0.4 
+  }));
+  scene.add(stars);
+
+  camera.position.z = 8;
+
+  let mouseX3D = 0, mouseY3D = 0, targetX3D = 0, targetY3D = 0;
+  document.addEventListener('mousemove', (e) => {
+    mouseX3D = (e.clientX / window.innerWidth) * 2 - 1;
+    mouseY3D = (e.clientY / window.innerHeight) * 2 - 1;
+  });
+
+  let time3D = 0;
+  function animate3D() {
+    requestAnimationFrame(animate3D);
+    time3D += 0.01;
+    
+    // Mouse parallax
+    targetX3D += (mouseX3D - targetX3D) * 0.02;
+    targetY3D += (mouseY3D - targetY3D) * 0.02;
+    camera.position.x = targetX3D * 2;
+    camera.position.y = -targetY3D * 1.5;
+    camera.lookAt(0, 0, 0);
+    
+    // Rotate hologram
+    hologramSphere.rotation.x = time3D * 0.2;
+    hologramSphere.rotation.y = time3D * 0.3;
+    
+    innerSphere.rotation.x = -time3D * 0.3;
+    innerSphere.rotation.y = -time3D * 0.2;
+    
+    // Pulse core
+    const pulse = Math.sin(time3D * 2) * 0.2 + 1;
+    core.scale.set(pulse, pulse, pulse);
+    
+    // Rotate rings
+    ring1.rotation.z = time3D * 0.5;
+    ring2.rotation.z = -time3D * 0.3;
+    ring3.rotation.y = time3D * 0.4;
+    
+    // Rotate particles
+    particles.rotation.y = time3D * 0.1;
+    
+    // Rotate stars slowly
+    stars.rotation.y = time3D * 0.005;
+    
+    renderer.render(scene, camera);
+  }
+  animate3D();
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+}
+
+// === FLUID BLOB CURSOR ===
+const blob = document.getElementById('cursorBlob');
+
+let mouseX = 0, mouseY = 0;
+let blobX = 0, blobY = 0;
+let velX = 0, velY = 0;
+let scale = 1;
+let angle = 0;
+
+document.addEventListener('mousemove', (e) => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+});
+
+function animateCursor() {
+  // Calculate velocity
+  const dx = mouseX - blobX;
+  const dy = mouseY - blobY;
+  
+  // Add spring physics
+  velX += dx * 0.15;
+  velY += dy * 0.15;
+  velX *= 0.75;
+  velY *= 0.75;
+  
+  blobX += velX;
+  blobY += velY;
+  
+  // Calculate stretch based on velocity
+  const speed = Math.sqrt(velX * velX + velY * velY);
+  const stretch = Math.min(speed * 0.1, 2);
+  const scaleX = 1 + stretch;
+  const scaleY = 1 - stretch * 0.3;
+  
+  // Calculate angle based on velocity direction
+  if (speed > 0.5) {
+    angle = Math.atan2(velY, velX) * (180 / Math.PI);
+  }
+  
+  // Apply transform
+  blob.style.left = blobX + 'px';
+  blob.style.top = blobY + 'px';
+  blob.style.transform = `translate(-50%, -50%) rotate(${angle}deg) scaleX(${scaleX}) scaleY(${scaleY})`;
+  
+  requestAnimationFrame(animateCursor);
+}
+animateCursor();
+
+// Hover states
+document.querySelectorAll('a, button, .feature-card, .team-member, .event-item, .service-card, .gallery-item').forEach(el => {
+  el.addEventListener('mouseenter', () => blob.classList.add('hover'));
+  el.addEventListener('mouseleave', () => blob.classList.remove('hover'));
+});
+
+// === LOADER ===
+const loaderTL = gsap.timeline();
+
+loaderTL
+  .to('.loader-logo', { opacity: 1, scale: 1, duration: 0.8, ease: 'power3.out' })
+  .to('.loader-progress', { opacity: 1, duration: 0.3 }, '-=0.3')
+  .to('.loader-text', { opacity: 1, duration: 0.3 }, '-=0.2')
+  .to('#loaderBar', { width: '100%', duration: 1.5, ease: 'power2.inOut' }, '-=0.3')
+  .to('.loader', { 
+    yPercent: -100, 
+    duration: 0.8, 
+    ease: 'power3.inOut',
+    delay: 0.3
+  })
+  .set('.loader', { display: 'none' })
+  // Hero animations
+  .to('.hero-title-word', {
+    y: 0,
+    opacity: 1,
+    duration: 0.8,
+    stagger: 0.1,
+    ease: 'power3.out'
+  }, '-=0.3')
+  .to('.hero-subtitle', { opacity: 1, y: 0, duration: 0.6 }, '-=0.4')
+  .to('.hero-cta-group', { opacity: 1, y: 0, duration: 0.6 }, '-=0.3')
+  .to('.hero-scroll', { opacity: 1, duration: 0.5 }, '-=0.2');
+
+// === SCROLL ANIMATIONS ===
+// About section
+gsap.from('.about-visual', {
+  opacity: 0,
+  scale: 0.8,
+  duration: 1,
+  scrollTrigger: {
+    trigger: '.about',
+    start: 'top 70%'
+  }
+});
+
+gsap.from('.about-content > *', {
+  opacity: 0,
+  y: 30,
+  duration: 0.8,
+  stagger: 0.15,
+  scrollTrigger: {
+    trigger: '.about-content',
+    start: 'top 70%'
+  }
+});
+
+// Feature cards
+gsap.from('.feature-card', {
+  opacity: 0,
+  y: 50,
+  duration: 0.8,
+  stagger: 0.1,
+  scrollTrigger: {
+    trigger: '.features-grid',
+    start: 'top 70%'
+  }
+});
+
+// Event section
+gsap.from('.event-content > *', {
+  opacity: 0,
+  y: 30,
+  duration: 0.8,
+  stagger: 0.1,
+  scrollTrigger: {
+    trigger: '.event',
+    start: 'top 60%'
+  }
+});
+
+// Upcoming Events
+gsap.from('.event-item', {
+  opacity: 0,
+  x: -30,
+  duration: 0.7,
+  stagger: 0.15,
+  ease: 'power2.out',
+  scrollTrigger: {
+    trigger: '.events-list',
+    start: 'top 80%',
+    once: true
+  }
+});
+
+// Services
+gsap.from('.service-card', {
+  opacity: 0,
+  y: 40,
+  duration: 0.7,
+  stagger: 0.12,
+  ease: 'power2.out',
+  scrollTrigger: {
+    trigger: '.services-grid',
+    start: 'top 80%',
+    once: true
+  }
+});
+
+// Gallery
+gsap.from('.gallery-item', {
+  opacity: 0,
+  scale: 0.9,
+  duration: 0.6,
+  stagger: 0.1,
+  scrollTrigger: {
+    trigger: '.gallery-grid',
+    start: 'top 75%'
+  }
+});
+
+// CTA section
+gsap.from('.cta-content > *', {
+  opacity: 0,
+  y: 30,
+  duration: 0.8,
+  stagger: 0.1,
+  scrollTrigger: {
+    trigger: '.cta',
+    start: 'top 60%'
+  }
+});
+
+// Parallax for gradients
+gsap.to('.hero-gradient-1', {
+  y: 200,
+  scrollTrigger: {
+    trigger: '.hero',
+    start: 'top top',
+    end: 'bottom top',
+    scrub: 1
+  }
+});
+
+gsap.to('.hero-gradient-2', {
+  y: -150,
+  scrollTrigger: {
+    trigger: '.hero',
+    start: 'top top',
+    end: 'bottom top',
+    scrub: 1
+  }
+});
+
+console.log('✨ GWL DAO loaded');
+
+// === FAQ ACCORDION ===
+document.querySelectorAll('.faq-question').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const item = btn.parentElement;
+    const isActive = item.classList.contains('active');
+    
+    // Close all items
+    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
+    
+    // Open clicked if wasn't active
+    if (!isActive) {
+      item.classList.add('active');
+    }
+  });
+});
+
+// === MOBILE MENU ===
+const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+const mobileMenu = document.getElementById('mobileMenu');
+
+mobileMenuBtn.addEventListener('click', () => {
+  mobileMenuBtn.classList.toggle('active');
+  mobileMenu.classList.toggle('active');
+  document.body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : '';
+});
+
+// Close menu when clicking a link
+document.querySelectorAll('.mobile-menu-links a').forEach(link => {
+  link.addEventListener('click', () => {
+    mobileMenuBtn.classList.remove('active');
+    mobileMenu.classList.remove('active');
+    document.body.style.overflow = '';
+  });
+});
+</script>
+
+</body>
+</html>
