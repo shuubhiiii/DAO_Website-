@@ -104,6 +104,15 @@
       justify-content: center;
       flex-direction: column;
       gap: 3rem;
+      animation: hideLoader 0s 3s forwards;
+    }
+    
+    @keyframes hideLoader {
+      to {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
     }
     
     .loader-logo {
@@ -179,6 +188,8 @@
       overflow-y: auto;
       transform: translateY(30px) scale(0.95);
       transition: transform 0.3s ease;
+      pointer-events: auto;
+      cursor: auto;
     }
 
     .register-modal.active .modal-content {
@@ -367,12 +378,23 @@
       color: var(--bg);
       font-weight: 600;
       font-size: 0.85rem;
-      cursor: none;
+      cursor: pointer !important;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+      z-index: 100;
+      pointer-events: auto !important;
     }
     
     .nav-cta:hover {
       transform: translateY(-2px);
+      box-shadow: 0 10px 40px rgba(255, 107, 107, 0.3);
+    }
+    
+    /* Ensure all buttons and links are clickable */
+    a, button {
+      cursor: pointer !important;
+      pointer-events: auto !important;
+    };
       box-shadow: 0 10px 40px rgba(255, 107, 107, 0.3);
     }
     
