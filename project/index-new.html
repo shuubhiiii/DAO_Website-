@@ -1731,6 +1731,47 @@
       border-radius: 20px;
     }
     
+    /* Video Placeholder */
+    .video-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%);
+      min-height: 400px;
+      padding-bottom: 0;
+    }
+    
+    .video-placeholder-content {
+      text-align: center;
+      padding: 3rem;
+    }
+    
+    .video-placeholder-content .play-icon {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, var(--gradient-1), var(--gradient-2));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      margin: 0 auto 1.5rem;
+      box-shadow: 0 10px 40px rgba(255, 107, 107, 0.4);
+    }
+    
+    .video-placeholder-content h3 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--gradient-1), var(--gradient-2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .video-placeholder-content p {
+      color: var(--text-dim);
+      font-size: 1rem;
+    }
+    
     .features-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -3380,14 +3421,12 @@
   
   <!-- Event Video -->
   <div class="features-video">
-    <div class="video-container">
-      <iframe 
-        src="https://www.youtube.com/embed/BvEz7VJoH64?autoplay=1&mute=1&loop=1&playlist=BvEz7VJoH64&controls=1&rel=0&modestbranding=1" 
-        title="GwaliorDAO Event Highlights"
-        frameborder="0" 
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-        allowfullscreen>
-      </iframe>
+    <div class="video-container video-placeholder">
+      <div class="video-placeholder-content">
+        <div class="play-icon">▶</div>
+        <h3>Event Highlights Coming Soon</h3>
+        <p>Stay tuned for GwaliorDAO 2026 event videos</p>
+      </div>
     </div>
   </div>
   
